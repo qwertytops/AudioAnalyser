@@ -11,7 +11,6 @@ An infectious disease monitoring system where users can upload datasets of infec
 
 A news sentiment analysis tool, allowing users to upload or input news content, and then analyse the text using NLP algorithms (e.g., sentiment scoring) to determine overall sentiment, and share the analysed data with their colleagues.
 
-
 Any method of data entry is fine. For example data could be manually entered by the user, or uploaded in batches in a suitable file format, or automatically sourced from other devices and services (e.g. fitness trackers, smart watches, publicly available feeds and datasets).
 
 Please think carefully about the design of the application. It should be:
