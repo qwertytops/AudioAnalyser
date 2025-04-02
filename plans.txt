@@ -1,0 +1,7 @@
+--ANALYSIS FEATURES--
+Frequency separation and visualisation
+Maximum amplitude
+Dominant pitch
+
+--RESOURCES--
+https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode
