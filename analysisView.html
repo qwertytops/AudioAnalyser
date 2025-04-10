@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+    <head>
+        <title>Analysis View</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="analysisView.css">
+    </head>
+
+    <body>
+        <div class="container">
+            <h1 class="display-1 mb-5">Audio Analyser</h1>
+
+            <div class="alert alert-danger" role="alert">
+                This page is still in development!
+            </div>
+
+            <h3 class="mb-4">Upload your file</h3>
+
+            <div class="drop-zone mb-4" id="drop-zone">
+                <p><span id="drop-zone-text">Drag & drop files here or click to browse</span></p>
+                <input type="file" id="fileInput" class="hidden-file-input" accept="audio/*">
+            </div>
+
+            <div class="text-center">
+                <button onclick="analyseFile()" id="analyseButton" class="btn btn-primary btn-lg"
+                    disabled="true">Analyse</button>
+            </div>
+
+            <div class="mt-5 text-center">
+                <canvas id="oscilloscope" width="600" height="200"></canvas>
+            </div>
+        </div>
+    </body>
+    <script src="analysisView.js"></script>
+
+</html>

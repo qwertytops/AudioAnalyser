@@ -1,0 +1,29 @@
+.drop-zone {
+    border: 2px dashed #6c757d;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    color: #6c757d;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.drop-zone:hover {
+    background-color: #e9ecef;
+}
+
+.hidden-file-input {
+    position: absolute;
+    left: -9999px;
+}
+
+.dragover {
+    background-color: #d1e7dd;
+    border-color: #0f5132;
+}
+
+#oscilloscope {
+    border: 1px solid #000;
+    border-radius: 20px;
+}
