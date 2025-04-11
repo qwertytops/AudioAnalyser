@@ -4,37 +4,32 @@ let analyseButton;
 
 const audioCtx = new AudioContext();
 const analyser = audioCtx.createAnalyser();
+let audioSource = null; // To store the current audio source
+let isPlaying = 0; // To track the playback state
 
 window.onload = function () {
     dropZone = document.getElementById('drop-zone');
     fileInput = document.getElementById('fileInput');
     analyseButton = document.getElementById('analyseButton');
 
-    console.log('Drop Zone:', dropZone);
-    console.log('File Input:', fileInput);
-
     // Event listener for clicking the drop zone
     dropZone.addEventListener('click', () => {
-        console.log('Drop zone clicked');
         fileInput.click();
     });
 
     // Event listener for dragover
     dropZone.addEventListener('dragover', (e) => {
-        console.log('Dragover event');
         e.preventDefault();
         dropZone.classList.add('dragover');
     });
 
     // Event listener for dragleave
     dropZone.addEventListener('dragleave', () => {
-        console.log('Dragleave event');
         dropZone.classList.remove('dragover');
     });
 
     // Event listener for drop
     dropZone.addEventListener('drop', (e) => {
-        console.log('Drop event');
         e.preventDefault();
         dropZone.classList.remove('dragover');
         const files = e.dataTransfer.files;
@@ -46,14 +41,11 @@ window.onload = function () {
 
     // Event listener for file input change
     fileInput.addEventListener('change', () => {
-        console.log('File input changed');
         if (fileInput.files.length > 0) {
             displayFileName(fileInput.files[0]);
         }
         analyseButton.disabled = false;
     });
-
-    console.log('All event listeners attached');
 };
 
 function displayFileName(file) {
@@ -80,11 +72,16 @@ function analyseFile() {
         // Decode the audio data
         audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
             // Visualize the entire waveform
-            visualizeFullWaveform(audioBuffer);
+            visualiseFullWaveform(audioBuffer);
 
-            // Smoothly scroll to the canvas
-            const canvas = document.getElementById("oscilloscope");
-            canvas.scrollIntoView({ behavior: "smooth", block: "start" });
+            // Perform analysis and populate data-area
+            analyzeAudioData(audioBuffer);
+
+            // Setup play, pause, and stop controls
+            setupAudioControls(audioBuffer);
+
+            // Smoothly scroll to the analyse button
+            analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
         }, (error) => {
             console.error('Error decoding audio file:', error);
             alert('Error decoding audio file.');
@@ -98,6 +95,97 @@ function analyseFile() {
 
     // Read the file as an ArrayBuffer
     reader.readAsArrayBuffer(file);
+}
+
+function analyzeAudioData(audioBuffer) {
+    const sampleRate = audioBuffer.sampleRate;
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 4096; // Increase FFT size for better resolution
+
+    // Create a buffer source and connect it to the analyser
+    // audioSource = audioCtx.createBufferSource();
+    // audioSource.buffer = audioBuffer;
+    // audioSource.connect(analyser);
+    // analyser.connect(audioCtx.destination);
+
+    // Add a small delay to ensure the audio is playing before analyzing
+    setTimeout(() => {
+        // Analyze frequency data
+        const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(frequencyData);
+
+        if (frequencyData.every(value => value === 0)) {
+            console.error("Frequency data contains only 0s. Check the audio source or connections.");
+        } else {
+            // Perform analysis
+            const nyquist = sampleRate / 2;
+            const binSize = nyquist / analyser.frequencyBinCount;
+            let highestFrequency = 0;
+            let lowestFrequency = nyquist;
+            let fundamentalFrequency = 0;
+            let maxAmplitude = 0;
+
+            frequencyData.forEach((value, index) => {
+                const frequency = index * binSize;
+
+                // Ignore 0 Hz and bins with no signal
+                if (frequency > 0 && value > 0) {
+                    highestFrequency = Math.max(highestFrequency, frequency);
+                    lowestFrequency = Math.min(lowestFrequency, frequency);
+
+                    // Update fundamental frequency if this bin has the highest amplitude
+                    if (value > maxAmplitude) {
+                        maxAmplitude = value;
+                        fundamentalFrequency = frequency;
+                    }
+                }
+            });
+
+            const clipLength = audioBuffer.duration;
+
+            // Calculate signal level in dB
+            const signalLevel = 20 * Math.log10(maxAmplitude / 255); // Normalize maxAmplitude to 255
+
+            // Update the data-area
+            document.getElementById("max-db").textContent = signalLevel.toFixed(2) + " dB";
+            document.getElementById("highest-frequency").textContent = highestFrequency.toFixed(2);
+            document.getElementById("highest-pitch").textContent = frequencyToPitch(highestFrequency);
+            document.getElementById("lowest-frequency").textContent = lowestFrequency.toFixed(2);
+            document.getElementById("lowest-pitch").textContent = frequencyToPitch(lowestFrequency);
+            document.getElementById("clip-length").textContent = clipLength.toFixed(2);
+            document.getElementById("fundamental-frequency").textContent = fundamentalFrequency.toFixed(2);
+            document.getElementById("fundamental-pitch").textContent = frequencyToPitch(fundamentalFrequency);
+        }
+    }, 100); // Delay of 100ms to ensure audio is playing
+}
+
+function frequencyToPitch(frequency) {
+    if (frequency <= 0) return "N/A";
+
+    const A4 = 440;
+    const semitonesFromA4 = 12 * Math.log2(frequency / A4);
+    const noteIndex = Math.round(semitonesFromA4) + 69; // MIDI note number
+    const octave = Math.floor(noteIndex / 12) - 1;
+    const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const noteName = noteNames[noteIndex % 12];
+
+    // Calculate the exact frequency of the note
+    const exactFrequency = A4 * Math.pow(2, (noteIndex - 69) / 12);
+
+    // Determine if the frequency is slightly higher or lower
+    const difference = frequency - exactFrequency;
+    const tolerance = exactFrequency * 0.01; // 2% tolerance for "slightly higher/lower"
+
+    console.log(`Frequency: ${frequency}, Exact Frequency: ${exactFrequency}, Difference: ${difference}, Tolerance: ${tolerance}`);
+
+    let suffix = "";
+    if (difference > tolerance) {
+        suffix = "+"; // Slightly higher
+    } else if (difference < -tolerance) {
+        suffix = "-"; // Slightly lower
+    }
+
+    return `${noteName}${octave}${suffix}`;
 }
 
 function visualizeAudio() {
@@ -144,14 +232,22 @@ function visualizeAudio() {
     draw();
 }
 
-function visualizeFullWaveform(audioBuffer) {
+function visualiseFullWaveform(audioBuffer) {
     const canvas = document.getElementById("oscilloscope");
     const canvasCtx = canvas.getContext("2d");
 
+    // Adjust canvas resolution for high-DPI displays without resizing
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const canvasWidth = canvas.offsetWidth; // Use the displayed width
+    const canvasHeight = canvas.offsetHeight; // Use the displayed height
+
+    canvas.width = canvasWidth * devicePixelRatio;
+    canvas.height = canvasHeight * devicePixelRatio;
+
+    canvasCtx.scale(devicePixelRatio, devicePixelRatio);
+
     // Get the audio data from the first channel
     const rawData = audioBuffer.getChannelData(0); // Use the first channel
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
 
     // Downsample the audio data to fit the canvas width
     const samplesPerPixel = Math.ceil(rawData.length / canvasWidth);
@@ -161,22 +257,80 @@ function visualizeFullWaveform(audioBuffer) {
     }
 
     // Normalize the data to fit within the canvas height
-    const normalizedData = downsampledData.map(value => (value + 1) / 2 * canvasHeight);
+    const normalisedData = downsampledData.map(value => (value + 1) / 2 * canvasHeight);
 
-    // Clear the canvas
-    canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+    function drawWaveform() {
+        // Clear the canvas
+        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // Draw the waveform
-    canvasCtx.beginPath();
-    canvasCtx.moveTo(0, canvasHeight / 2); // Start at the middle of the canvas
+        // Draw the waveform
+        canvasCtx.beginPath();
+        canvasCtx.moveTo(0, canvasHeight / 2); // Start at the middle of the canvas
 
-    for (let i = 0; i < normalizedData.length; i++) {
-        const x = i;
-        const y = canvasHeight - normalizedData[i];
-        canvasCtx.lineTo(x, y);
+        for (let x = 0; x < normalisedData.length; x++) {
+            const y = canvasHeight - normalisedData[x];
+            canvasCtx.lineTo(x, y);
+        }
+
+        canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+        canvasCtx.lineWidth = 1;
+        canvasCtx.stroke();
     }
 
-    canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
-    canvasCtx.lineWidth = 2;
-    canvasCtx.stroke();
+    drawWaveform();
+}
+
+function playAudio(audioBuffer) {
+    console.log(isPlaying);
+    if (audioSource && isPlaying > 0) {
+        audioSource.stop();
+    }
+    audioSource = audioCtx.createBufferSource();
+    audioSource.buffer = audioBuffer;
+    audioSource.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    audioSource.start();
+    isPlaying += 1;
+
+    // Handle when playback ends
+    audioSource.onended = () => {
+        isPlaying -= 1;
+    };
+}
+
+function setupAudioControls(audioBuffer) {
+    const playButton = document.getElementById("playButton");
+    const pauseButton = document.getElementById("pauseButton");
+    const stopButton = document.getElementById("stopButton");
+
+    // Play button functionality
+    playButton.addEventListener("click", () => {
+        console.log('play')
+        playAudio(audioBuffer);
+    });
+
+    // Pause button functionality
+    pauseButton.addEventListener("click", () => {
+        console.log('un/pause')
+        if (isPlaying > 0) {
+            audioCtx.suspend().then(() => {
+                isPlaying -= 1;
+            });
+        } else {
+            audioCtx.resume().then(() => {
+                isPlaying += 1;
+            })
+        }
+    });
+
+    // Stop button functionality
+    stopButton.addEventListener("click", () => {
+        console.log('stop');
+        if (audioSource) {
+            audioSource.stop();
+            audioSource.disconnect();
+            audioSource = null;
+            isPlaying = 0;
+        }
+    });
 }
