@@ -60,7 +60,7 @@ function displayFileName(file) {
 function analyseFile() {
     const file = fileInput.files[0];
     if (!file) {
-        alert('No file selected!');
+        alert('No file selected');
         return;
     }
 
@@ -84,13 +84,13 @@ function analyseFile() {
             analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
         }, (error) => {
             console.error('Error decoding audio file:', error);
-            alert('Error decoding audio file.');
+            alert('Error decoding audio file');
         });
     };
 
     reader.onerror = function () {
         console.error('Error reading file:', reader.error);
-        alert('Error reading file.');
+        alert('Error reading file');
     };
 
     // Read the file as an ArrayBuffer
@@ -102,64 +102,57 @@ function analyzeAudioData(audioBuffer) {
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 4096; // Increase FFT size for better resolution
 
-    // Create a buffer source and connect it to the analyser
-    // audioSource = audioCtx.createBufferSource();
-    // audioSource.buffer = audioBuffer;
-    // audioSource.connect(analyser);
-    // analyser.connect(audioCtx.destination);
-
     // Add a small delay to ensure the audio is playing before analyzing
     setTimeout(() => {
         // Analyze frequency data
         const frequencyData = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(frequencyData);
 
-        if (frequencyData.every(value => value === 0)) {
-            console.error("Frequency data contains only 0s. Check the audio source or connections.");
-        } else {
-            // Perform analysis
-            const nyquist = sampleRate / 2;
-            const binSize = nyquist / analyser.frequencyBinCount;
-            let highestFrequency = 0;
-            let lowestFrequency = nyquist;
-            let fundamentalFrequency = 0;
-            let maxAmplitude = 0;
+        // Perform analysis
+        const nyquist = sampleRate / 2;
+        const binSize = nyquist / analyser.frequencyBinCount;
+        let highestFrequency = 0;
+        let lowestFrequency = nyquist;
+        let fundamentalFrequency = 0;
+        let maxAmplitude = 0;
 
-            frequencyData.forEach((value, index) => {
-                const frequency = index * binSize;
+        frequencyData.forEach((value, index) => {
+            const frequency = index * binSize;
 
-                // Ignore 0 Hz and bins with no signal
-                if (frequency > 0 && value > 0) {
-                    highestFrequency = Math.max(highestFrequency, frequency);
-                    lowestFrequency = Math.min(lowestFrequency, frequency);
+            // Ignore 0 Hz and bins with no signal
+            if (frequency > 0 && value > 0) {
+                highestFrequency = Math.max(highestFrequency, frequency);
+                lowestFrequency = Math.min(lowestFrequency, frequency);
 
-                    // Update fundamental frequency if this bin has the highest amplitude
-                    if (value > maxAmplitude) {
-                        maxAmplitude = value;
-                        fundamentalFrequency = frequency;
-                    }
+                // Update fundamental frequency if this bin has the highest amplitude
+                if (value > maxAmplitude) {
+                    maxAmplitude = value;
+                    fundamentalFrequency = frequency;
                 }
-            });
+            }
+        });
 
-            const clipLength = audioBuffer.duration;
+        const clipLength = audioBuffer.duration;
 
-            // Calculate signal level in dB
-            const signalLevel = 20 * Math.log10(maxAmplitude / 255); // Normalize maxAmplitude to 255
-
-            // Update the data-area
-            document.getElementById("max-db").textContent = signalLevel.toFixed(2) + " dB";
-            document.getElementById("highest-frequency").textContent = highestFrequency.toFixed(2);
-            document.getElementById("highest-pitch").textContent = frequencyToPitch(highestFrequency);
-            document.getElementById("lowest-frequency").textContent = lowestFrequency.toFixed(2);
-            document.getElementById("lowest-pitch").textContent = frequencyToPitch(lowestFrequency);
-            document.getElementById("clip-length").textContent = clipLength.toFixed(2);
-            document.getElementById("fundamental-frequency").textContent = fundamentalFrequency.toFixed(2);
-            document.getElementById("fundamental-pitch").textContent = frequencyToPitch(fundamentalFrequency);
-        }
-    }, 100); // Delay of 100ms to ensure audio is playing
+        // Calculate signal level in dB
+        const signalLevel = 20 * Math.log10(maxAmplitude / 255);
+        
+        updateDataArea(signalLevel, highestFrequency, lowestFrequency, clipLength, fundamentalFrequency);
+    }, 100); // Delay of 100ms to ensure audio is loaded
 }
 
-function frequencyToPitch(frequency) {
+function updateDataArea(signalLevel,highestFrequency, lowestFrequency, clipLength, fundamentalFrequency) {
+    document.getElementById("max-db").textContent = signalLevel.toFixed(2) + " dB";
+    document.getElementById("highest-frequency").textContent = highestFrequency.toFixed(2);
+    document.getElementById("highest-pitch").textContent = frequencyToPitchStr(highestFrequency);
+    document.getElementById("lowest-frequency").textContent = lowestFrequency.toFixed(2);
+    document.getElementById("lowest-pitch").textContent = frequencyToPitchStr(lowestFrequency);
+    document.getElementById("clip-length").textContent = clipLength.toFixed(2);
+    document.getElementById("fundamental-frequency").textContent = fundamentalFrequency.toFixed(2);
+    document.getElementById("fundamental-pitch").textContent = frequencyToPitchStr(fundamentalFrequency);
+}
+
+function frequencyToPitchStr(frequency) {
     if (frequency <= 0) return "N/A";
 
     const A4 = 440;
@@ -169,20 +162,19 @@ function frequencyToPitch(frequency) {
     const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     const noteName = noteNames[noteIndex % 12];
 
-    // Calculate the exact frequency of the note
-    const exactFrequency = A4 * Math.pow(2, (noteIndex - 69) / 12);
+    const standardNoteFrequency = A4 * Math.pow(2, (noteIndex - 69) / 12);
 
     // Determine if the frequency is slightly higher or lower
-    const difference = frequency - exactFrequency;
-    const tolerance = exactFrequency * 0.01; // 2% tolerance for "slightly higher/lower"
+    const difference = frequency - standardNoteFrequency;
+    const tolerance = standardNoteFrequency * 0.01; // 2% tolerance for "slightly higher/lower"
 
-    console.log(`Frequency: ${frequency}, Exact Frequency: ${exactFrequency}, Difference: ${difference}, Tolerance: ${tolerance}`);
+    console.log(`Frequency: ${frequency}, Exact Frequency: ${standardNoteFrequency}, Difference: ${difference}, Tolerance: ${tolerance}`);
 
     let suffix = "";
     if (difference > tolerance) {
-        suffix = "+"; // Slightly higher
+        suffix = "+";
     } else if (difference < -tolerance) {
-        suffix = "-"; // Slightly lower
+        suffix = "-";
     }
 
     return `${noteName}${octave}${suffix}`;
@@ -238,8 +230,8 @@ function visualiseFullWaveform(audioBuffer) {
 
     // Adjust canvas resolution for high-DPI displays without resizing
     const devicePixelRatio = window.devicePixelRatio || 1;
-    const canvasWidth = canvas.offsetWidth; // Use the displayed width
-    const canvasHeight = canvas.offsetHeight; // Use the displayed height
+    const canvasWidth = canvas.offsetWidth;
+    const canvasHeight = canvas.offsetHeight;
 
     canvas.width = canvasWidth * devicePixelRatio;
     canvas.height = canvasHeight * devicePixelRatio;
@@ -247,7 +239,7 @@ function visualiseFullWaveform(audioBuffer) {
     canvasCtx.scale(devicePixelRatio, devicePixelRatio);
 
     // Get the audio data from the first channel
-    const rawData = audioBuffer.getChannelData(0); // Use the first channel
+    const rawData = audioBuffer.getChannelData(0);
 
     // Downsample the audio data to fit the canvas width
     const samplesPerPixel = Math.ceil(rawData.length / canvasWidth);
@@ -260,7 +252,6 @@ function visualiseFullWaveform(audioBuffer) {
     const normalisedData = downsampledData.map(value => (value + 1) / 2 * canvasHeight);
 
     function drawWaveform() {
-        // Clear the canvas
         canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 
         // Draw the waveform
