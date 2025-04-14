@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/analysisView.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="display-1 mb-5">Audio Analyser</h1>
+
+    <div class="alert alert-danger" role="alert">
+        This page is still in development!
+    </div>
+
+    <h3 class="mb-4">Upload your file</h3>
+
+    <div class="drop-zone mb-4" id="drop-zone">
+        <p><span id="drop-zone-text">Drag & drop files here or click to browse</span></p>
+        <input type="file" id="fileInput" class="hidden-file-input" accept="audio/*">
+    </div>
+
+    <div class="text-center">
+        <button id="analyseButton" class="btn btn-primary btn-lg" disabled="true">Analyse</button>
+    </div>
+
+    <div class="mt-5 text-center">
+        <canvas id="oscilloscope" width="500" height="200"></canvas>
+    </div>
+    <div class="mt-3 text-center">
+        <button id="playButton" class="btn btn-success btn-sm">Play</button>
+        <button id="pauseButton" class="btn btn-warning btn-sm">Pause</button>
+        <button id="stopButton" class="btn btn-danger btn-sm">Stop</button>
+    </div>
+    <hr>
+    <div id="data-area" class="text-center m-5">
+        <h3>Audio Analysis Results</h3>
+        <div class="data-grid">
+            <div><strong>Clip Length:</strong> <span id="clip-length">N/A</span> seconds</div>
+            <div><strong>Max level:</strong> <span id="max-db">N/A</span></div>
+            <div><strong>Highest Frequency:</strong> <span id="highest-frequency">N/A</span> Hz (<span
+                    id="highest-pitch">N/A</span>)</div>
+            <div><strong>Lowest Frequency:</strong> <span id="lowest-frequency">N/A</span> Hz (<span
+                    id="lowest-pitch">N/A</span>)</div>
+            <div><strong>Fundamental Frequency:</strong> <span id="fundamental-frequency">N/A</span> Hz (<span
+                    id="fundamental-pitch">N/A</span>)</div>
+        </div>
+    </div>
+    <hr>
+</div>
+<script type="module" src="{{ url_for('static', filename='scripts/analysisView.js') }}"></script>
+{% endblock %}
