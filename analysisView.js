@@ -5,7 +5,6 @@ let analyseButton;
 const audioCtx = new AudioContext();
 const analyser = audioCtx.createAnalyser();
 let audioSource = null; // To store the current audio source
-let isPlaying = 0; // To track the playback state
 
 window.onload = function () {
     dropZone = document.getElementById('drop-zone');
@@ -46,6 +45,11 @@ window.onload = function () {
         }
         analyseButton.disabled = false;
     });
+
+    analyseButton.addEventListener('click', () => {
+        analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
+        analyseFile();
+    })
 };
 
 function displayFileName(file) {
@@ -271,57 +275,53 @@ function visualiseFullWaveform(audioBuffer) {
     drawWaveform();
 }
 
-function playAudio(audioBuffer) {
-    console.log(isPlaying);
-    if (audioSource && isPlaying > 0) {
-        audioSource.stop();
-    }
-    audioSource = audioCtx.createBufferSource();
-    audioSource.buffer = audioBuffer;
-    audioSource.connect(analyser);
-    analyser.connect(audioCtx.destination);
-    audioSource.start();
-    isPlaying += 1;
-
-    // Handle when playback ends
-    audioSource.onended = () => {
-        isPlaying -= 1;
-    };
-}
+let isPlaying = false;
+let isPaused = false;
 
 function setupAudioControls(audioBuffer) {
-    const playButton = document.getElementById("playButton");
-    const pauseButton = document.getElementById("pauseButton");
-    const stopButton = document.getElementById("stopButton");
-
-    // Play button functionality
     playButton.addEventListener("click", () => {
         console.log('play')
         playAudio(audioBuffer);
     });
 
-    // Pause button functionality
     pauseButton.addEventListener("click", () => {
         console.log('un/pause')
-        if (isPlaying > 0) {
+        if (!isPlaying) { return; }
+        if (!isPaused) {
             audioCtx.suspend().then(() => {
-                isPlaying -= 1;
+                isPaused = true;
             });
         } else {
             audioCtx.resume().then(() => {
-                isPlaying += 1;
+                isPaused = false;
             })
         }
     });
 
-    // Stop button functionality
     stopButton.addEventListener("click", () => {
         console.log('stop');
-        if (audioSource) {
-            audioSource.stop();
-            audioSource.disconnect();
-            audioSource = null;
-            isPlaying = 0;
-        }
+        stopAudio();
     });
+}
+
+function stopAudio() {
+    if (!audioSource || !isPlaying) { return; }
+    if (isPaused) {
+        audioCtx.resume();
+    }
+    audioSource.stop();
+    audioSource.disconnect();
+    audioSource = null;
+    isPlaying = false;
+    isPaused = false;
+}
+
+function playAudio(audioBuffer) {
+    stopAudio();
+    
+    audioSource = audioCtx.createBufferSource();
+    audioSource.buffer = audioBuffer;
+    audioSource.connect(audioCtx.destination);
+    audioSource.start();
+    isPlaying = true;
 }
