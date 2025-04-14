@@ -5,6 +5,7 @@ let analyseButton;
 const audioCtx = new AudioContext();
 const analyser = audioCtx.createAnalyser();
 let audioSource = null; // To store the current audio source
+let audioBuffer = null;
 
 window.onload = function () {
     dropZone = document.getElementById('drop-zone');
@@ -50,6 +51,10 @@ window.onload = function () {
         analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
         analyseFile();
     })
+
+    playButton.addEventListener("click", playAudio);
+    pauseButton.addEventListener("click", pauseAudio);
+    stopButton.addEventListener("click", stopAudio);
 };
 
 function displayFileName(file) {
@@ -74,15 +79,14 @@ function analyseFile() {
         const arrayBuffer = event.target.result;
 
         // Decode the audio data
-        audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
+        audioCtx.decodeAudioData(arrayBuffer, (auBuf) => {
+            audioBuffer = auBuf;
+
             // Visualize the entire waveform
-            visualiseFullWaveform(audioBuffer);
+            visualiseFullWaveform();
 
             // Perform analysis and populate data-area
-            analyzeAudioData(audioBuffer);
-
-            // Setup play, pause, and stop controls
-            setupAudioControls(audioBuffer);
+            analyzeAudioData();
 
             // Smoothly scroll to the analyse button
             analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -101,7 +105,7 @@ function analyseFile() {
     reader.readAsArrayBuffer(file);
 }
 
-function analyzeAudioData(audioBuffer) {
+function analyzeAudioData() {
     const sampleRate = audioBuffer.sampleRate;
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 4096; // Increase FFT size for better resolution
@@ -228,7 +232,7 @@ function visualizeAudio() {
     draw();
 }
 
-function visualiseFullWaveform(audioBuffer) {
+function visualiseFullWaveform() {
     const canvas = document.getElementById("oscilloscope");
     const canvasCtx = canvas.getContext("2d");
 
@@ -278,34 +282,25 @@ function visualiseFullWaveform(audioBuffer) {
 let isPlaying = false;
 let isPaused = false;
 
-function setupAudioControls(audioBuffer) {
-    playButton.addEventListener("click", () => {
-        console.log('play')
-        playAudio(audioBuffer);
-    });
-
-    pauseButton.addEventListener("click", () => {
-        console.log('un/pause')
-        if (!isPlaying) { return; }
-        if (!isPaused) {
-            audioCtx.suspend().then(() => {
-                isPaused = true;
-            });
-        } else {
-            audioCtx.resume().then(() => {
-                isPaused = false;
-            })
-        }
-    });
-
-    stopButton.addEventListener("click", () => {
-        console.log('stop');
-        stopAudio();
-    });
+function pauseAudio() {
+    console.log('un/pause')
+    if (!isPlaying) { return; }
+    if (!isPaused) {
+        console.log("pausing");
+        audioCtx.suspend().then(() => {
+            isPaused = true;
+        });
+    } else {
+        console.log("unpausing");
+        audioCtx.resume().then(() => {
+            isPaused = false;
+        })
+    }
 }
 
 function stopAudio() {
     if (!audioSource || !isPlaying) { return; }
+    console.log("stop");
     if (isPaused) {
         audioCtx.resume();
     }
@@ -316,7 +311,9 @@ function stopAudio() {
     isPaused = false;
 }
 
-function playAudio(audioBuffer) {
+function playAudio() {
+    console.log("play");
+    if (!audioBuffer) { return; }
     stopAudio();
     
     audioSource = audioCtx.createBufferSource();
