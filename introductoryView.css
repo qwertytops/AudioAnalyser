@@ -50,7 +50,7 @@
             display: flex;
             gap: 1rem;
             justify-content: center;
-            margin: 2rem 0;
+            margin: 2rem ;
         }
         
         .auth-buttons .btn {
@@ -82,5 +82,79 @@
             transform: translateY(-2px);
         }
         
-
+        .auth-form {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #495057;
+        }
+        
+        .form-control {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .feature-icon {
+            background-color: var(--accent-color);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .features-section {
+            padding: 2rem 0;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
         

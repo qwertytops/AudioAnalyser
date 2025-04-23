@@ -28,36 +28,78 @@
         </div>
         <div class="auth-buttons">
             <button onclick="showLogInForm()" id="logInButton" class="btn btn-primary">Log In</button>
-            <button onclick="showSignUpForm()" id="signUpButton" class="btn btn-primary">Sign Up</button>  
+            <button onclick="showSignUpForm()" id="signUpButton" class="btn btn-outline-primary">
+                <i class="fas fa-user-plus me"></i>Sign Up
+            </button> 
         </div>
         
 
-        <div id="logInForm" style="display: none; margin-top: 20px;">
-                    <div class="form-group">
-                        <label for="logInEmail">Email:</label>
-                        <input type="email" name="email" id="logInEmail" class="form-control" placeholder="Enter your email"><br>
-
-                        <label for="logInPassword">Password:</label>
-                        <input type="password" name="password" id="logInPassword" class="form-control" placeholder="Enter your password"><br>
-                    </div>
-
-                    <button onclick="submitLogIn()" class ="btn btn-primary">Submit</button>
-        </div>
-
-        <div id="signUpForm" style="display: none; margin-top: 20px;">
-            <div class="from-group">
-                <label for="signUpEmail">Email:</label>
-                <input type="email" name="email" id="signUpEmail" class="form-control" placeholder="Enter your email"><br>
-
-                <label for="signUpUsername">Username:</label>
-                <input type="text" name="username" id="signUpUsername" class="form-control" placeholder="Create a username"><br>
-
-                <label for="signUpPassword">Password:</label>
-                <input type="password" name="password" id="signUpPassword" class="form-control" placeholder="Create a password"><br>
+        <div id="logInForm" class="auth-form">
+            <h3 class="text-center mb-4">Log In to Your Account</h3>
+            <div class="form-group">
+                <label for="logInEmail" class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" name="email" id="logInEmail" class="form-control" placeholder="Enter your email">
+                </div>
             </div>
 
-            <button onclick="submitSignUp()" class="btn btn-primary">Submit</button>
-        
+            <div class="form-group">
+                <label for="logInPassword" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" id="logInPassword" class="form-control" placeholder="Enter your password">
+                </div>
+            </div>
+
+
+            <button onclick="submitLogIn()" class="btn btn-primary w-100">
+                <i class="fas fa-sign-in-alt me-2"></i>Log In
+            </button>
+
+            <div class="form-footer">
+                <p>Don't have an account? <a href="#" onclick="showSignUpForm()">Sign up now</a></p>
+            </div>
+        </div>
+
+        <div id="signUpForm" class="auth-form">
+            <h3 class="text-center mb-4">Create an Account</h3>
+            <div class="form-group">
+                <label for="signUpEmail" class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" name="email" id="signUpEmail" class="form-control" placeholder="Enter your email">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="signUpUsername" class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    <input type="text" name="username" id="signUpUsername" class="form-control" placeholder="Create a username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="signUpPassword" class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" id="signUpPassword" class="form-control" placeholder="Create a password">
+                </div>
+                <small class="form-text text-muted">Password must be at least 8 characters long with letters and numbers</small>
+            </div>
+
+            <button onclick="submitSignUp()" class="btn btn-primary w-100">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+            </button>
+
+            <div class="form-footer">
+                <p>Already have an account? <a href="#" onclick="showLogInForm()">Log in here</a></p>
+            </div>
+    </div>
+    <div class="footer">
+        <div class="container">
+            <p>&copy; 2025 Audio Analyser. All rights reserved.</p>
         </div>
     </div>
 
