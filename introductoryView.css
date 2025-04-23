@@ -213,44 +213,6 @@ body {
     transform: rotate(30deg);
 }
 
-/* Dark mode support */
-[data-bs-theme="dark"] {
-    --light-bg: #2077ce;
-    --dark-text: #f8f9fa;
-}
-
-[data-bs-theme="dark"] body {
-    background: linear-gradient(135deg, #1f1f1f 0%, #2d3345 100%);
-    color: var(--dark-text);
-}
-
-[data-bs-theme="dark"] .app-container {
-    background-color: #1c1c1c;
-}
-
-[data-bs-theme="dark"] .auth-form {
-    background-color: #2b3035;
-}
-
-[data-bs-theme="dark"] .form-control {
-    background-color: #212529;
-    border-color: #495057;
-    color: #e9ecef;
-}
-
-[data-bs-theme="dark"] .app-subtitle {
-    color: #adb5bd;
-}
-
-[data-bs-theme="dark"] .form-label,
-[data-bs-theme="dark"] .form-check-label {
-    color: #e9ecef;
-}
-
-[data-bs-theme="dark"] .form-text {
-    color: #adb5bd;
-}
-
 /* Additional styles for smooth transitions */
 .input-group-text {
     transition: background-color var(--transition-speed) ease, 
@@ -295,4 +257,74 @@ body {
 [data-bs-theme="dark"] .sun-icon {
     opacity: 1;
     transform: rotate(0);
+}
+
+.feature-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #f8f9fa;
+}
+
+.feature-card .feature-icon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    transition: color 0.2s ease;
+}
+
+.feature-card:hover .feature-icon {
+    color: #ffffff;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] {
+    --light-bg: #2077ce;
+    --dark-text: #f8f9fa;
+}
+
+[data-bs-theme="dark"] body {
+    background: linear-gradient(135deg, #1f1f1f 0%, #2d3345 100%);
+    color: var(--dark-text);
+}
+
+[data-bs-theme="dark"] .app-container {
+    background-color: #1c1c1c;
+}
+
+[data-bs-theme="dark"] .auth-form {
+    background-color: #2b3035;
+}
+
+[data-bs-theme="dark"] .form-control {
+    background-color: #212529;
+    border-color: #495057;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .app-subtitle {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] .form-check-label {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .form-text {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .feature-card {
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #2e2e2e;
 }

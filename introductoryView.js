@@ -64,3 +64,4 @@ function toggleTheme() {
     // Save preference in localStorage (persists between page reloads)
     localStorage.setItem('theme', htmlElement.getAttribute('data-bs-theme'));
 }
+
