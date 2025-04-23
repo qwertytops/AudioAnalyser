@@ -17,6 +17,37 @@
         <input type="file" id="fileInput" class="hidden-file-input" accept="audio/*">
     </div>
 
+    <div class="m-4">
+        <h5 class="text-center">Parameters</h5>
+        <form id="analysis-parameters-form" class="custom-form">
+            <div class="form-group">
+                <label for="fftSize">FFT Size:</label>
+                <select id="fftSize" class="form-control">
+                    <option value="32">32</option>
+                    <option value="64">64</option>
+                    <option value="128">128</option>
+                    <option value="256">256</option>
+                    <option value="512">512</option>
+                    <option value="1024">1024</option>
+                    <option value="2048" selected>2048</option>
+                    <option value="4096">4096</option>
+                    <option value="8192">8192</option>
+                    <option value="16384">16384</option>
+                    <option value="32768">32768</option>
+                </select>
+                <small class="form-text text-muted">
+                    Higher FFT size gives more precise frequency analysis<br>
+                    Lower FFT size gives more precise amplitude analysis
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="noiseFloor">Noise Floor (dBFS):</label>
+                <input type="number" id="noiseFloor" class="form-control" value="-50" step="1" min="-100" max="0">
+                <small class="form-text text-muted">Signals below this level will be ignored</small>
+            </div>
+        </form>
+    </div>
+
     <div class="text-center">
         <button id="analyseButton" class="btn btn-primary btn-lg" disabled="true">Analyse</button>
     </div>
@@ -34,7 +65,7 @@
         <h3>Audio Analysis Results</h3>
         <div class="data-grid">
             <div><strong>Clip Length:</strong> <span id="clip-length">N/A</span> seconds</div>
-            <div><strong>Max level:</strong> <span id="max-db">N/A</span></div>
+            <div><strong>Max level (dBFS):</strong> <span id="max-db">N/A</span></div>
             <div><strong>Highest Frequency:</strong> <span id="highest-frequency">N/A</span> Hz (<span
                     id="highest-pitch">N/A</span>)</div>
             <div><strong>Lowest Frequency:</strong> <span id="lowest-frequency">N/A</span> Hz (<span

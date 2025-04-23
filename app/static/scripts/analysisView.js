@@ -74,12 +74,61 @@ function analyseFile() {
         const arrayBuffer = event.target.result;
 
         // Decode the audio data
-        audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
-            // Visualize the entire waveform
-            visualiseFullWaveform(audioBuffer);
+        audioCtx.decodeAudioData(arrayBuffer, async (audioBuffer) => {
+            visualiseFullWaveform(audioBuffer); // works with regular audio context
 
-            // Perform analysis and populate data-area
-            analyzeAudioData(audioBuffer);
+            const offlineCtx = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                audioBuffer.length,
+                audioBuffer.sampleRate
+            );
+            const offlineSource = offlineCtx.createBufferSource();
+            offlineSource.buffer = audioBuffer;
+
+            const analysisNode = offlineCtx.createAnalyser();
+            const fftSize = parseInt(document.getElementById('fftSize').value, 10);
+            analysisNode.fftSize = fftSize;
+            const bufferLengthAlt = analysisNode.frequencyBinCount;
+
+            const dataArray = new Uint8Array(bufferLengthAlt);
+            let fullArray = new Uint32Array(bufferLengthAlt);
+
+            offlineSource.connect(analysisNode);
+            offlineSource.connect(offlineCtx.destination);
+            offlineSource.start(0);
+
+            const step = 0.1;
+            let totalSteps = 0;
+            const durationInSeconds = audioBuffer.duration;
+
+            let maxLevel = -Infinity;
+
+            for (let i = 0; i < durationInSeconds; i += step) {
+                const stoptime = i;
+                // the trick is to call suspend at each time point you're interested in. 
+                // do not await since it won't ever happen - you can only suspend a running context,
+                // and we'll run it on the last line by calling startRendering. these will only start resolving as the context is rendering
+                // so we're essentially scheduling stopping time points
+              
+                void offlineCtx.suspend(i).then((a) => {
+
+                    analysisNode.getByteFrequencyData(dataArray);
+                    maxLevel = Math.max(calculateDBFSFloat(analysisNode), maxLevel);
+
+                    fullArray.forEach((_, index) => {
+                        fullArray[index] += dataArray[index];
+                    });
+
+                    void offlineCtx.resume();
+                });
+                totalSteps++;
+            }
+              
+            await offlineCtx.startRendering();
+            fullArray.forEach((_, index) => {
+                fullArray[index] = fullArray[index] / totalSteps;
+            });
+            analyzeAudioData(fullArray, analysisNode, audioBuffer.sampleRate, audioBuffer.duration, maxLevel);
 
             // Setup play, pause, and stop controls
             setupAudioControls(audioBuffer);
@@ -101,48 +150,43 @@ function analyseFile() {
     reader.readAsArrayBuffer(file);
 }
 
-function analyzeAudioData(audioBuffer) {
-    const sampleRate = audioBuffer.sampleRate;
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 4096; // Increase FFT size for better resolution
+function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLevel) {
+    console.log("Frequency data is:", frequencyData);
 
-    // Add a small delay to ensure the audio is playing before analyzing
-    setTimeout(() => {
-        // Analyze frequency data
-        const frequencyData = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(frequencyData);
+    const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
 
-        // Perform analysis
-        const nyquist = sampleRate / 2;
-        const binSize = nyquist / analyser.frequencyBinCount;
-        let highestFrequency = 0;
-        let lowestFrequency = nyquist;
-        let fundamentalFrequency = 0;
-        let maxAmplitude = 0;
+    // Perform analysis
+    const nyquist = sampleRate / 2;
+    const binSize = nyquist / analyser.frequencyBinCount;
+    let highestFrequency = 0;
+    let lowestFrequency = nyquist;
+    let fundamentalFrequency = 0;
+    let maxAmplitude = 0;
 
-        frequencyData.forEach((value, index) => {
-            const frequency = index * binSize;
+    frequencyData.forEach((value, index) => {
+        const frequency = index * binSize;
+        const signalLevel = 20 * Math.log10(value / 255);
+        // console.log(frequency, value);
 
-            // Ignore 0 Hz and bins with no signal
-            if (frequency > 0 && value > 0) {
-                highestFrequency = Math.max(highestFrequency, frequency);
-                lowestFrequency = Math.min(lowestFrequency, frequency);
+        // Ignore 0 Hz and bins with no signal
+        if (frequency > 0 && signalLevel > noiseFloor) {
+            highestFrequency = Math.max(highestFrequency, frequency);
+            lowestFrequency = Math.min(lowestFrequency, frequency);
 
-                // Update fundamental frequency if this bin has the highest amplitude
-                if (value > maxAmplitude) {
-                    maxAmplitude = value;
-                    fundamentalFrequency = frequency;
-                }
+            // Update fundamental frequency if this bin has the highest amplitude
+            if (value > maxAmplitude) {
+                maxAmplitude = value;
+                fundamentalFrequency = frequency;
             }
-        });
+        }
+    });
 
-        const clipLength = audioBuffer.duration;
-
-        // Calculate signal level in dB
-        const signalLevel = 20 * Math.log10(maxAmplitude / 255);
-        
-        updateDataArea(signalLevel, highestFrequency, lowestFrequency, clipLength, fundamentalFrequency);
-    }, 100); // Delay of 100ms to ensure audio is loaded
+    // Calculate signal level in dBFS
+    // const signalLevel = 20 * Math.log10(maxAmplitude / 255);
+    // console.log(maxAmplitude, maxAmplitude / 255, Math.log10(maxAmplitude / 255), signalLevel);
+    const signalLevel = maxLevel;
+    
+    updateDataArea(signalLevel, highestFrequency, lowestFrequency, duration, fundamentalFrequency);
 }
 
 function updateDataArea(signalLevel,highestFrequency, lowestFrequency, clipLength, fundamentalFrequency) {
@@ -161,9 +205,10 @@ function frequencyToPitchStr(frequency) {
 
     const A4 = 440;
     const semitonesFromA4 = 12 * Math.log2(frequency / A4);
-    const noteIndex = Math.round(semitonesFromA4) + 69; // MIDI note number
+    let noteIndex = Math.round(semitonesFromA4) + 69; // MIDI note number
     const octave = Math.floor(noteIndex / 12) - 1;
     const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    while (noteIndex < 0) { noteIndex = 12; }
     const noteName = noteNames[noteIndex % 12];
 
     const standardNoteFrequency = A4 * Math.pow(2, (noteIndex - 69) / 12);
@@ -172,14 +217,12 @@ function frequencyToPitchStr(frequency) {
     const difference = frequency - standardNoteFrequency;
     const tolerance = standardNoteFrequency * 0.01; // 2% tolerance for "slightly higher/lower"
 
-    console.log(`Frequency: ${frequency}, Exact Frequency: ${standardNoteFrequency}, Difference: ${difference}, Tolerance: ${tolerance}`);
-
     let suffix = "";
-    if (difference > tolerance) {
-        suffix = "+";
-    } else if (difference < -tolerance) {
-        suffix = "-";
-    }
+    // if (difference > tolerance) {
+    //     suffix = "+";
+    // } else if (difference < -tolerance) {
+    //     suffix = "-";
+    // }
 
     return `${noteName}${octave}${suffix}`;
 }
@@ -324,4 +367,26 @@ function playAudio(audioBuffer) {
     audioSource.connect(audioCtx.destination);
     audioSource.start();
     isPlaying = true;
+}
+
+function calculateDBFSFloat(analyser) {
+    const bufferLength = analyser.fftSize;
+    const timeDomainData = new Uint8Array(bufferLength);
+
+    analyser.getByteTimeDomainData(timeDomainData);
+    console.log("tdd:", timeDomainData);
+
+    // Convert the byte data (0-255) to normalized amplitude (-1 to 1)
+    const normalizedData = Array.from(timeDomainData).map(value => (value - 128) / 128);
+    console.log("nd:", normalizedData);
+
+    // Calculate RMS (Root Mean Square) amplitude
+    const rms = Math.sqrt(
+        normalizedData.reduce((sum, value) => sum + value * value, 0) / bufferLength
+    );
+    console.log("rms:", rms);
+
+    // Calculate dBFS
+    const dbfs = 20 * Math.log10(rms);
+    return dbfs;
 }

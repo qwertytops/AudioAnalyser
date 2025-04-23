@@ -9,3 +9,7 @@ def index():
 @app.route('/analysis')
 def analysis():
     return render_template('analysisView.html')
+
+@app.route('/share')
+def share():
+    return render_template('shareView.html')

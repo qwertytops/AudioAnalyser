@@ -35,7 +35,7 @@
 
 .data-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
     text-align: left;
     margin-top: 1rem;
@@ -46,4 +46,55 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     background-color: #f9f9f9;
+}
+
+/* Center the form and add spacing */
+.custom-form {
+    display: flex;
+    justify-content: center;
+    gap: 2rem; /* Space between form groups */
+    margin-top: 1rem;
+}
+
+/* Style for form groups */
+.custom-form .form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Style for labels */
+.custom-form label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Style for select dropdown */
+.custom-select {
+    width: 200px;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Style for input fields */
+.custom-input {
+    width: 200px;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+/* Style for help text */
+.custom-help-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+/* Add spacing between form groups */
+.custom-form .form-group:not(:last-child) {
+    margin-right: 2rem;
 }
