@@ -6,6 +6,10 @@ from app import app
 def index():
     return render_template('introductoryView.html')
 
+@app.route('/upload')
+def upload():
+    return render_template('uploadView.html')
+
 @app.route('/analysis')
 def analysis():
     return render_template('analysisView.html')
