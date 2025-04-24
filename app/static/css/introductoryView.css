@@ -19,7 +19,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, var(--light-bg) 0%, #8ca6ec 100%);
     min-height: 100vh;
-    padding-top: 2rem;
+    
 }
 
 .app-container {
