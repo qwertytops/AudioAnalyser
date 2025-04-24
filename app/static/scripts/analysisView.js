@@ -310,7 +310,7 @@ function visualiseFullWaveform(audioBuffer) {
             canvasCtx.lineTo(x, y);
         }
 
-        canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+        canvasCtx.strokeStyle = 'rgb(0, 8, 255)';
         canvasCtx.lineWidth = 1;
         canvasCtx.stroke();
     }
