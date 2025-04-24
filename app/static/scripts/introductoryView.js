@@ -45,3 +45,23 @@ function submitLogIn() {
         alert("Invalid username or password. the DB doesnt exist yet");
     }
 }
+
+function toggleTheme() {
+    const htmlElement = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const currentTheme = htmlElement.getAttribute('data-bs-theme');
+    
+    if (currentTheme === 'light') {
+        htmlElement.setAttribute('data-bs-theme', 'dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    } else {
+        htmlElement.setAttribute('data-bs-theme', 'light');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+    }
+    
+    // Save preference in localStorage (persists between page reloads)
+    localStorage.setItem('theme', htmlElement.getAttribute('data-bs-theme'));
+}
+

@@ -1,0 +1,330 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
+    --light-bg: #f8f9fa;
+    --dark-text: #212529;
+    --transition-speed: 0.5s; /* Define transition speed variable */
+}
+
+/* Add transitions to all elements */
+* {
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--light-bg) 0%, #8ca6ec 100%);
+    min-height: 100vh;
+    padding-top: 2rem;
+}
+
+.app-container {
+    max-width: 1000px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    position: relative; 
+    transition: background-color var(--transition-speed) ease, 
+                box-shadow var(--transition-speed) ease; 
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.app-title {
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.app-subtitle {
+    color: #6c757d;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    transition: color var(--transition-speed) ease; 
+}
+
+.development-alert {
+    border-left: 5px solid #dc3545;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.auth-buttons .btn {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all var(--transition-speed) ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.auth-form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    display: none;
+    animation: fadeIn 0.5s ease;
+    transition: background-color var(--transition-speed) ease; 
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    transition: color var(--transition-speed) ease;
+}
+
+.form-control {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    transition: border-color var(--transition-speed) ease, 
+                box-shadow var(--transition-speed) ease,
+                background-color var(--transition-speed) ease, 
+                color var(--transition-speed) ease; /* Smooth transition for inputs */
+}
+
+.form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.form-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color var(--transition-speed) ease; /* Smooth transition for links */
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+.feature-icon {
+    background-color: var(--accent-color);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    transition: background-color var(--transition-speed) ease;
+}
+
+.features-section {
+    padding: 2rem 0;
+}
+
+.footer {
+    text-align: center;
+    padding: 1.5rem 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+    transition: color var(--transition-speed) ease;
+}
+
+/* Dark mode toggle button */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: rgb(255, 255, 255);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    background-color: var(--secondary-color);
+}
+
+.theme-toggle i {
+    font-size: 1.2rem;
+    transition: transform var(--transition-speed) ease;
+}
+
+.theme-toggle:hover i {
+    transform: rotate(30deg);
+}
+
+/* Additional styles for smooth transitions */
+.input-group-text {
+    transition: background-color var(--transition-speed) ease, 
+                border-color var(--transition-speed) ease;
+}
+
+.form-check-input {
+    transition: background-color var(--transition-speed) ease, 
+                border-color var(--transition-speed) ease;
+}
+
+/* Icon transition */
+.theme-icon-container {
+    position: relative;
+    width: 1.15rem;
+    height: 1.1rem;
+}
+
+.theme-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity var(--transition-speed) ease,
+                transform var(--transition-speed) ease;
+}
+
+.moon-icon {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+.sun-icon {
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+
+[data-bs-theme="dark"] .moon-icon {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+[data-bs-theme="dark"] .sun-icon {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+.feature-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #f8f9fa;
+}
+
+.feature-card .feature-icon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    transition: color 0.2s ease;
+}
+
+.feature-card:hover .feature-icon {
+    color: #ffffff;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] {
+    --light-bg: #2077ce;
+    --dark-text: #f8f9fa;
+}
+
+[data-bs-theme="dark"] body {
+    background: linear-gradient(135deg, #1f1f1f 0%, #2d3345 100%);
+    color: var(--dark-text);
+}
+
+[data-bs-theme="dark"] .app-container {
+    background-color: #1c1c1c;
+}
+
+[data-bs-theme="dark"] .auth-form {
+    background-color: #2b3035;
+}
+
+[data-bs-theme="dark"] .form-control {
+    background-color: #212529;
+    border-color: #495057;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .app-subtitle {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] .form-check-label {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .form-text {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .feature-card {
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #2e2e2e;
+}
