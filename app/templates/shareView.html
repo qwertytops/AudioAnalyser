@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shareView.css') }}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="display-1 mb-5">Audio Analyser</h1>
+
+    <div class="alert alert-danger" role="alert">
+        This page is still in development!
+    </div>
+
+
+</div>
+<script type="module" src="{{ url_for('static', filename='scripts/shareView.js') }}"></script>
+{% endblock %}
