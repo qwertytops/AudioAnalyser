@@ -2,8 +2,8 @@
 Bootstrap
 
 ## Completed tasks
-Login view\
-Analysis view\
+Login view basic\
+Analysis view basic\
 
 ## Tasks for the week
 Design flow for website -> ALL\
