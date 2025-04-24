@@ -265,6 +265,49 @@ body {
     padding: 1rem;
 }
 
+.feature-card-static {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.feature-card-static .feature-icon {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    transition: color 0.2s ease;
+}
+
+.feature-card-share {
+    background-color: rgb(0, 108, 186) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none !important;
+    padding: 1rem;
+}
+
+.feature-card-share .feature-icon {
+    background-color: rgb(0, 108, 186);
+    border: none !important;
+    font-size: 3rem;
+    color: #ffffff;
+    transition: color 0.2s ease;
+}
+.feature-card-share .feature-icon i{
+    border: none !important;
+    padding: 0 !important;
+}
+
+.feature-card-share h4,
+.feature-card-share p {
+    color: #ffffff;
+}
+
+.feature-card-share:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 21, 255, 0.825);
+    background-color: #f8f9fa;
+    border: none !important;
+}
+
 .feature-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
@@ -328,3 +371,12 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     background-color: #2e2e2e;
 }
+
+[data-bs-theme="dark"] .feature-card-share .feature-icon {
+    background-color: rgb(0, 108, 186)!important;
+    border: none !important;
+    font-size: 3rem;
+    color: #ffffff;
+    transition: color 0.2s ease;
+}
+

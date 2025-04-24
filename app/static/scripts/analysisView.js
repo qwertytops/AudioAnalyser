@@ -310,7 +310,7 @@ function visualiseFullWaveform(audioBuffer) {
             canvasCtx.lineTo(x, y);
         }
 
-        canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+        canvasCtx.strokeStyle = 'rgb(0, 8, 255)';
         canvasCtx.lineWidth = 1;
         canvasCtx.stroke();
     }
@@ -390,3 +390,52 @@ function calculateDBFSFloat(analyser) {
     const dbfs = 20 * Math.log10(rms);
     return dbfs;
 }
+
+
+
+// Add the toggleTheme function from introductoryView.js
+function toggleTheme() {
+    const htmlElement = document.documentElement;
+    const currentTheme = htmlElement.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    htmlElement.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+}
+// Apply saved theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    }
+});
+
+// Add this to your JavaScript file or in a <script> tag at the end of your HTML file
+document.addEventListener('DOMContentLoaded', function() {
+    // Hide oscilloscope and results sections initially
+    const oscilloscope = document.querySelector('#oscilloscope'); // Update with your actual ID
+    const resultsSection = document.querySelector('#data-area');
+    const playButton = document.querySelector('#playButton'); // Update with your actual button ID
+    const pauseButton = document.querySelector('#pauseButton'); // Update with your actual button ID
+    const stopButton = document.querySelector('#stopButton'); // Update with your actual button ID
+    
+    if (oscilloscope) oscilloscope.style.display = 'none';
+    if (resultsSection) resultsSection.style.display = 'none';
+    if (playButton) playButton.style.display = 'none';
+    if (pauseButton) pauseButton.style.display = 'none';
+    if (stopButton) stopButton.style.display = 'none';
+    
+    // Add event listener to the Analysis button
+    const analyseButton = document.querySelector('#analyseButton'); // Update with your actual button ID
+    
+    if (analyseButton) {
+        analyseButton.addEventListener('click', function() {
+            // Show the hidden sections when button is clicked
+            if (oscilloscope) oscilloscope.style.display = 'block';
+            if (resultsSection) resultsSection.style.display = 'block';
+            if (playButton) playButton.style.display = 'inline-block';
+            if (pauseButton) pauseButton.style.display = 'inline-block';
+            if (stopButton) stopButton.style.display = 'inline-block';
+        });
+    }
+});
+
