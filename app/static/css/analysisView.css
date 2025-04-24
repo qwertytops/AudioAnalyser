@@ -77,36 +77,7 @@
     margin-bottom: 0.5rem;
 }
 
-/* Style for select dropdown */
-.custom-select {
-    width: 200px;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-/* Style for input fields */
-.custom-input {
-    width: 200px;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-}
-
-/* Style for help text */
-.custom-help-text {
-    font-size: 0.875rem;
-    color: #6c757d;
-    margin-top: 0.25rem;
-}
-
-/* Add spacing between form groups */
-.custom-form .form-group:not(:last-child) {
-    margin-right: 2rem;
-}
-
+/* Dark mode support */
 [data-bs-theme="dark"] .drop-zone {
     border: 2px dashed #6c757d;
     border-radius: 10px;
