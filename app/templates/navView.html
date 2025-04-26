@@ -1,3 +1,6 @@
+<script src="{{ url_for('static', filename='scripts/introductoryView.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
+
 <nav class = "navbar navbar-expand-lg bg=light">
     <div class = "container">
         <a class="navbar-brand" href="#">logo/name</a>
@@ -25,6 +28,15 @@
                 <a href="#" class="text-decoration-none" >Log In</a>
                 <a href="#" class="btn btn-outline-primary">Sign Up</a>
             </div>
+            
+        <!-- Dark Mode Toggle Button -->
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+            <div class="theme-icon-container">
+                <i class="fas fa-moon theme-icon moon-icon"></i>
+                <i class="fas fa-sun theme-icon sun-icon"></i>
+            </div>
+        </button>
+
         </div>
     </div>
 </nav>

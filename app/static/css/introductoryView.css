@@ -182,7 +182,7 @@ body {
 /* Dark mode toggle button */
 .theme-toggle {
     position: absolute;
-    top: 20px;
+    top: 34px;
     right: 20px;
     z-index: 100;
     width: 45px;
