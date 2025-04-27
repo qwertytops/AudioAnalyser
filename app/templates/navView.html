@@ -25,8 +25,8 @@
                 </li>
             </ul>
             <div class="d-flex align-items-center" id = "right">
-                <a href="#" class="text-decoration-none" >Log In</a>
-                <a href="#" class="btn btn-outline-primary">Sign Up</a>
+                <a href="introductoryView.html" class="text-decoration-none" >Log In</a>
+                <a href="signUp.html" class="btn btn-outline-primary">Sign Up</a>
             </div>
             
         <!-- Dark Mode Toggle Button -->
@@ -40,6 +40,15 @@
         </div>
     </div>
 </nav>
+
+<script>
+    // Get the current page URL
+    const currentPage = encodeURIComponent(window.location.href);
+
+    // Update the login and signup links to include it as a query parameter
+    document.getElementById('loginLink').href = `login.html?redirect=${currentPage}`;
+    document.getElementById('signUpLink').href = `signUp.html?redirect=${currentPage}`;
+</script>
 
         
 
