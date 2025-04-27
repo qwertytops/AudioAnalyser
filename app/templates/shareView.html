@@ -11,32 +11,69 @@
                 Options
             </div>
             <ul class="sidebar-List">
-                <li class = "sidebar-Option">Share</li>
-                <li class = "sidebar-Option">Notifications</li>
+                <li class = "sidebar-Option active" onclick="switchContent('share', this)">Share</li>
+                <li class = "sidebar-Option" onclick="switchContent('notification', this)">Notifications</li>
                 
             </ul>
         </div> 
 
         <div class="content">
-            <div class = "section">
+            <div class = "section active" id = "share">
                 <h1>Share View</h1>
+                <textarea placeholder="send a message (optional)"></textarea>
+                <select> 
+                    <option value="1">analysis 1</option>
+                    <option value="2">analysis 2</option>
+                    <option value="3">analysis 3</option>
+                </select>
+                <div class="analysis">
+                    <div class="data">
+                      <div class="data-label">Clip Length</div>
+                      <div class="data-value">-</div>
+                    </div>
+                    <div class="data">
+                      <div class="data-label">Max level (dBFS)</div>
+                      <div class="data-value">-</div>
+                    </div>
+                    <div class="data">
+                      <div class="data-label">Highest Frequency</div>
+                      <div class="data-value">-</div>
+                    </div>
+                    <div class="data">
+                      <div class="data-label">Lowest Frequency</div>
+                      <div class="data-value">-</div>
+                    </div>
+                    <div class="data">
+                        <div class="data-label">Fundamental Frequency</div>
+                        <div class="data-value">-</div>
+                      </div>
+                </div>
+                <div class = "friend">
+                    <label for="friendSelect" class="friend-label">Share with:</label>
+                    <select id="friendSelect" class="friend-select"> 
+                        <option disabled selected>Select a friend</option>
+                        <option value="1">friend 1</option>
+                        <option value="2">friend 2</option>
+                        <option value="3">friend 3</option>
+                    </select>
+                </div>
 
+                <div class="shareButton">
+                    <button type="button" class="btn btn-primary" id = "shareButton">Share</button>
+                </div>
 
             </div>
 
-            <div class = "section">
-                <h1>Share View</h1>
+            <div class = "section" id = "notification" >
+                <h1>notifications</h1>
             </div>
         </div>
         
-            <div class = "section">
-                <h1>Share View</h1>
-            </div>
-      
+           
 
 
     </div>
 </div>
 
-<script type="module" src="{{ url_for('static', filename='scripts/shareView.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/shareView.js') }}"></script>
 {% endblock %}

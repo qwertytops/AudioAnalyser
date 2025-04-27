@@ -61,12 +61,118 @@ body {
     color: #333;
     transition: background-color 0.3s;
 }
+.sidebar-Option.active {
+    background-color: #007bff;
+    color: white;
+}
 .sidebar-Option:hover {
     background-color: #ddd;
 }
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
 
-.section{
+
+.section {
+    display: none;
+    background: white;
+    padding: 20px;
+  }
+.section h1 {
+    font-size: 40px;
+    margin-bottom: 20px;
+    margin-left: 300px;
+    color: #333;
+}
+.section.active {
+    display: block;
+}
+
+.analysis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.data {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    background-color: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.data-label {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+.data-value {
+    font-weight: bold;
+    color: #2c3e50;
+}
+textarea, select {
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+.friend {
     display: flex;
     align-items: center;
+    gap: 10px; 
+    margin-top: 20px;
+}
+  
+.friend-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+   
+}
+  
+.friend-select {
+    width: 250px; 
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    cursor: pointer;
+    appearance: none;
+}
+  
+.friend-select:focus {
+    border-color: #4285f4;
+    outline: none;
+    box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+}
+ 
+#shareButton:hover {
+    
+    background: #3367d6;
+}
+.shareButton {
+    margin-top: 40px;
+    display: flex;
     justify-content: center;
+    align-items: center;
+}
+
+#shareButton {
+    
+    background: #4285f4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease;
 }
