@@ -11,21 +11,30 @@
                 Options
             </div>
             <ul class="sidebar-List">
-                <li class = "sidebar-Option active" onclick="switchContent('share', this)">Share</li>
-                <li class = "sidebar-Option" onclick="switchContent('notification', this)">Notifications</li>
+                <li class = "sidebar-Option active" onclick="switchContent('share', this)"> <svg id = "shareIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill" viewBox="0 0 16 16">
+                    <path  d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
+                  </svg> Share</li>
+                <li class = "sidebar-Option" onclick="switchContent('notification', this)"><svg id = "bell" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
+                  </svg>Notifications</li>
                 
             </ul>
         </div> 
 
         <div class="content">
             <div class = "section active" id = "share">
-                <h1>Share View</h1>
-                <textarea placeholder="send a message (optional)"></textarea>
-                <select> 
-                    <option value="1">analysis 1</option>
-                    <option value="2">analysis 2</option>
-                    <option value="3">analysis 3</option>
-                </select>
+                <h1>Share</h1>
+                <div class = "form-container">
+                    <textarea placeholder="send a message (optional)"></textarea>
+                    <select class="analysis-select"> 
+                        <option value="1">analysis 1</option>
+                        <option value="2">analysis 2</option>
+                        <option value="3">analysis 3</option>
+                    </select>
+                </div>
+                <div class="mt-5 text-center">
+                    <canvas id="oscilloscope" width="500" height="200"></canvas>
+                </div>
                 <div class="analysis">
                     <div class="data">
                       <div class="data-label">Clip Length</div>
@@ -57,6 +66,7 @@
                         <option value="3">friend 3</option>
                     </select>
                 </div>
+                
 
                 <div class="shareButton">
                     <button type="button" class="btn btn-primary" id = "shareButton">Share</button>
@@ -66,8 +76,8 @@
 
             <div class = "section" id = "notification" >
                 <h1>notifications</h1>
-                <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-bell-slash" style="font-size: 48px; color: #dadce0; margin-bottom: 20px;"></i>
+                <div class = "notBell">
+                    <i id = "bell2" class="fas fa-bell-slash" style="font-size: 48px; color: #dadce0; margin-bottom: 20px;"></i>
                     <p>No new notifications</p>
                     
                 </div>
