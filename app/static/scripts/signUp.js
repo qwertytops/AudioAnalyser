@@ -16,5 +16,5 @@ function submitSignUp() {
 
     localStorage.setItem(email, JSON.stringify(userData));
     alert("Sign up successful! Redirecting to log in page...");
-    window.location.href = "index.html";
+    window.location.href = "/";
 }
