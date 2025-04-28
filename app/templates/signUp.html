@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
+{% endblock %}
+{% block content %}
+
+
+
+<div class="container app-container">
+    <div class="app-header">
+        <h1 class="display-4 app-title">Create an account</h1>
+    </div>
+    <div class="alert alert-danger" role="alert">
+        This page is still in development!
+    </div>
+    <div class="form-group">
+        <label for="signUpEmail">Email:</label>
+        <input type="email" id="signUpEmail" class="form-control" placeholder="Enter your email"><br>
+
+        <label for="signUpUsername">Username:</label>
+        <input type="text" id="signUpUsername" class="form-control" placeholder="Create a username"><br>
+
+        <label for="signUpPassword">Password:</label>
+        <input type="password" id="signUpPassword" class="form-control" placeholder="Create a password"><br>
+    </div>
+
+    <button onclick="submitSignUp()" class="btn btn-primary">Sign Up</button>
+    <a href="/" class="btn btn-secondary ms-2">Back to Log In</a>
+</div>
+
+
+<script src="{{ url_for('static', filename='scripts/signUp.js') }}"></script>
+
+{% endblock %}
+

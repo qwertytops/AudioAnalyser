@@ -17,3 +17,7 @@ def analysis():
 @app.route('/share')
 def share():
     return render_template('shareView.html')
+
+@app.route('/signUp')
+def signUp():
+    return render_template('signUp.html')

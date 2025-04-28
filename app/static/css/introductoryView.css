@@ -27,7 +27,7 @@ body {
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    padding: 2.5rem;
+    padding: 5rem;
     margin-bottom: 2rem;
     position: relative; 
     transition: background-color var(--transition-speed) ease, 
@@ -182,7 +182,7 @@ body {
 /* Dark mode toggle button */
 .theme-toggle {
     position: absolute;
-    top: 20px;
+    top: 34px;
     right: 20px;
     z-index: 100;
     width: 45px;
