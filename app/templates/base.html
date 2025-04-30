@@ -4,28 +4,31 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="Audio Analyser - Analyze and share audio files">
+        <meta name="description" content="Audiometry - Analyze and share audio files">
         {% if title %}
-        <title>{{ title }} - Audio Analyser</title>
+        <title>{{ title }} - Audiometry</title>
         {% else %}
-        <title>Audio Analyser</title>
+        <title>Audiometry</title>
         {% endif %}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/navView.css') }}">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         {% block styles %}{% endblock %}
     </head>
 
     <body class="d-flex flex-column min-vh-100">
-        <header class="page-header">
-            <p>placeholder header</p>
-        </header>
+
+        {% block navbar %}
+        {% include 'navView.html' %}
+        {% endblock %}
+
 
         {% block content %}{% endblock %}
 
         <div class="footer">
             <div class="container">
-                <p>&copy; 2025 Audio Analyser. All rights reserved.</p>
+                <p>&copy; 2025 Audiometry. All rights reserved.</p>
             </div>
         </div>
     </body>

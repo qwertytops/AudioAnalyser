@@ -1,0 +1,54 @@
+<script src="{{ url_for('static', filename='scripts/introductoryView.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
+
+<nav class="navbar navbar-expand-lg bg=light">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            Audiometry <i class="fas fa-microphone-lines ms-2"></i>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/share">Share</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/account">Account</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center" id="right">
+                <a href="introductoryView.html" class="text-decoration-none">Log In</a>
+
+                <a href="signUp.html" class="btn btn-outline-primary">Sign Up</a>
+            </div>
+
+            <!-- Dark Mode Toggle Button -->
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+                <div class="theme-icon-container">
+                    <i class="fas fa-moon theme-icon moon-icon"></i>
+                    <i class="fas fa-sun theme-icon sun-icon"></i>
+                </div>
+            </button>
+
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Get the current page URL
+    const currentPage = encodeURIComponent(window.location.href);
+
+    // Update the login and signup links to include it as a query parameter
+    document.getElementById('loginLink').href = `login.html?redirect=${currentPage}`;
+    document.getElementById('signUpLink').href = `signUp.html?redirect=${currentPage}`;
+</script>

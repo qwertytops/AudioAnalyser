@@ -25,8 +25,8 @@ https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode
 Func names camelCase with return type e.g. doSomethingStr(), doSomethingElseInt()
 
 ### Git workflow
-1. pull (git pull) (*first time* git clone [url])
-2. create new branch (git checkout -b [branchname]
+1. pull (git pull origin [branch]) (*first time* git clone [url])
+2. create new branch (git checkout -b [branchname])
 3. make changes and commits (git commit -m "[commit message]")
 4. push branch (git push origin [branchname])
 5. create pull request (on GitHub)
@@ -34,3 +34,4 @@ Func names camelCase with return type e.g. doSomethingStr(), doSomethingElseInt(
 Other:
 change branch - git checkout [branchname]\
 branch status - git status\
+create new branch from remote branch - (git checkout -b [branchname] origin/[branchname])\
