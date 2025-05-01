@@ -126,3 +126,51 @@
     font-weight: 600;
 }
 
+/* Dark mode support */
+[data-bs-theme="dark"] .account-sidebar {
+    background-color: #2b3035;
+}
+
+[data-bs-theme="dark"] .account-menu-item {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .account-menu-item:hover {
+    background-color: #343a40;
+    color: #4895ef;
+}
+
+[data-bs-theme="dark"] .history-item {
+    border-color: #495057;
+}
+
+[data-bs-theme="dark"] .history-item-details {
+    background-color: #343a40;
+}
+
+[data-bs-theme="dark"] .empty-icon {
+    color: #6c757d;
+}
+
+[data-bs-theme="dark"] .settings-group h6 {
+    color: #e9ecef;
+}
+
+/* Card styling for dark mode */
+[data-bs-theme="dark"] .card {
+    background-color: #2b3035;
+    border-color: #495057;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: #343a40;
+    border-color: #495057;
+}
+
+/* Form controls for dark mode */
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: #212529;
+    border-color: #495057;
+    color: #e9ecef;
+}
