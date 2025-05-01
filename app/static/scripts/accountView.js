@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
     // Menu switching functionality
     const menuItems = document.querySelectorAll('.account-menu-item');
@@ -19,5 +18,5 @@ document.addEventListener('DOMContentLoaded', function() {
                 targetSection.classList.add('active');
             }
         });
-    });
+    });    
 });
