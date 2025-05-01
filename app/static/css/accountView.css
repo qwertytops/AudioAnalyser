@@ -1,0 +1,128 @@
+/* Account page specific styles */
+.account-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.account-sidebar {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.profile-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #4361ee;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto;
+}
+
+.account-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.account-menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-weight: 500;
+    color: #495057;
+    transition: all 0.2s ease;
+}
+
+.account-menu-item:hover {
+    background-color: #e9ecef;
+    color: #4361ee;
+}
+
+.account-menu-item.active {
+    background-color: #4361ee;
+    color: white;
+}
+
+.account-section {
+    display: none;
+}
+
+.account-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* History items */
+.history-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.history-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.history-item-header {
+    margin-bottom: 0.75rem;
+}
+
+.history-item-details {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.history-detail {
+    padding: 0.5rem;
+}
+
+.history-detail p {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.history-item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Empty state icons */
+.empty-icon {
+    font-size: 3rem;
+    color: #adb5bd;
+    margin-bottom: 1rem;
+}
+
+/* Settings section */
+.settings-group {
+    margin-bottom: 1.5rem;
+}
+
+.settings-group h6 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-weight: 600;
+}
+
