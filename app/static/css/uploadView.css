@@ -1,15 +1,43 @@
 :root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
     --light-bg: #f8f9fa;
+    --dark-bg: #1f1f1f;
+    --light-container: #ffffff;
+    --dark-container: #1c1c1c;
+    --light-border: #ddd;
+    --dark-border: #343a40;
+    --light-text: #333;
+    --dark-text: #f8f9fa;
+    --light-upload-bg: #ffffff;
+    --dark-upload-bg: #2b3035;
+    --light-sidepanel-bg: #fff;
+    --dark-sidepanel-bg: #212529;
+    --transition-speed: 0.5s;
+}
+
+/* Add transitions to all elements */
+* {
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
 }
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, var(--light-bg) 0%, #8ca6ec 100%);
     min-height: 100vh;
-    
 }
 
-.uploadtitle{
+/* Dark mode for body background */
+[data-bs-theme="dark"] body {
+    background: linear-gradient(135deg, #1f1f1f 0%, #2d3345 100%);
+    color: var(--dark-text);
+}
+
+.uploadtitle {
     position: absolute;
     top: 0;
     left: 0;
@@ -20,64 +48,105 @@ body {
     color: #4361ee;
     margin-top: 2rem;
 }
-.upload{
+
+/* Dark mode for upload title */
+[data-bs-theme="dark"] .uploadtitle {
+    color: var(--accent-color);
+}
+
+.upload {
     position: relative;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: #ffffff;
+    background-color: var(--light-upload-bg);
     border-radius: 8px;
     border: 2px dotted #6c757d;
     min-height: 600px;
     overflow: hidden;
-
 }
+
+/* Dark mode for upload container */
+[data-bs-theme="dark"] .upload {
+    background-color: var(--dark-upload-bg);
+    border-color: #495057;
+}
+
 .upload.dragover {
     background-color: #e9ecef;
     border-color: #6c757d;
 }
+
+/* Dark mode for upload dragover state */
+[data-bs-theme="dark"] .upload.dragover {
+    background-color: #343a40;
+    border-color: #6c757d;
+}
+
 .sidePanel {
     position: absolute;
     top: 0;
     right: -300px;
     height: 100%;
     width: 300px;
-    background-color: #fff;
+    background-color: var(--light-sidepanel-bg);
     border-left: 1px solid #dee2e6;
     transition: 0.4s;
     z-index: 2;
     padding: 20px;
-    
 }
+
+/* Dark mode for side panel */
+[data-bs-theme="dark"] .sidePanel {
+    background-color: var(--dark-sidepanel-bg);
+    border-left: 1px solid var(--dark-border);
+}
+
 .sidePanel.open {
     right: 0;
 }
+
 .sidePanel h6 {
     margin-bottom: 20px;
     text-align: center;
+    color: var(--light-text);
 }
+
+/* Dark mode for side panel heading */
+[data-bs-theme="dark"] .sidePanel h6 {
+    color: var(--dark-text);
+}
+
 .sidePanel ul {
     list-style: none;
     padding-left: 0;
     max-height: 400px;
     overflow: auto;
 }
+
 .sidePanel ul li {
     padding: 8px 0;
     border-bottom: 1px solid #eee;
+    color: var(--light-text);
 }
+
+/* Dark mode for side panel list items */
+[data-bs-theme="dark"] .sidePanel ul li {
+    border-bottom: 1px solid #343a40;
+    color: var(--dark-text);
+}
+
 .slidePanel {
-    position:absolute;
+    position: absolute;
     left: -50px;
     top: 50%;
     transform: translateY(-50%);
     width: 50px;
     height: 80px;
-    background-color: #fff;
+    background-color: var(--light-container);
     border: 1px solid #dee2e6;
     border-right: none;
-
     border-radius: 5px 0 0 5px;
     display: flex;
     align-items: center;
@@ -86,8 +155,19 @@ body {
     z-index: 3;
 }
 
+/* Dark mode for slide panel */
+[data-bs-theme="dark"] .slidePanel {
+    background-color: var(--dark-container);
+    border-color: var(--dark-border);
+}
+
 #filename {
     margin-top: 20px;
     font-size: 1.2rem;
     color: #4361ee;
+}
+
+/* Dark mode for filename */
+[data-bs-theme="dark"] #filename {
+    color: var(--accent-color);
 }
