@@ -421,6 +421,9 @@ function saveAnalysis() {
             document.getElementById('confirmShareButton').addEventListener('click', () => {
                 window.location.href = '/share';
             });
+        } else if (response.status === 401) {
+            console.log('redirecting to login');
+            window.location.href = '/signUp';
         } else {
             alert('Failed to save analysis.');
         }

@@ -19,12 +19,15 @@ def analysis():
     return render_template('analysisView.html')
 
 @app.route('/save', methods=['GET', 'POST'])
-@login_required
 def save():
+
+    if not current_user.is_authenticated:
+        return jsonify({'error': 'User not logged in'}), 401
+
     data = request.get_json()
 
     analysis = AnalysisResult(
-        id=db.session.query(func.max(AnalysisResult.id)).scalar(),
+        id=db.session.query(func.max(AnalysisResult.id)).scalar(), # update database so this autoincrements
         title="default_title",
         description="default_description",
         createdAt=datetime.datetime.now(),
@@ -39,6 +42,7 @@ def save():
 
     db.session.add(analysis)
     db.session.commit()
+    print("saved!")
     return jsonify({'message': 'Analysis saved successfully!'}), 200
 
 
