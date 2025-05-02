@@ -28,9 +28,8 @@
                 </li>
             </ul>
             <div class="d-flex align-items-center" id="right">
-                <a href="/" class="text-decoration-none">Log In</a>
-
-                <a href="/signUp" class="btn btn-outline-primary">Sign Up</a>
+                <a href="/" class="text-decoration-none" id="loginLink">Log In</a>
+                <a href="/signUp" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
             </div>
 
             <!-- Dark Mode Toggle Button -->
@@ -46,11 +45,15 @@
 </nav>
 <script>
     // Get the current page URL
-    const currentPage = encodeURIComponent(window.location.href);
-
-    // Update the login and signup links to include it as a query parameter
-    document.getElementById('loginLink').href = `login.html?redirect=${currentPage}`;
-    document.getElementById('signUpLink').href = `signUp.html?redirect=${currentPage}`;
+    const currentPage = window.location.pathname;
+    
+    // Update the signup link to include redirect info if we're not already on the signup page
+    if (currentPage !== '/signUp') {
+        const signUpLink = document.getElementById('signUpLink');
+        if (signUpLink) {
+            signUpLink.href = `/signUp?redirect=${encodeURIComponent(currentPage)}`;
+        }
+    }
     
     // Apply saved theme on page load
     document.addEventListener('DOMContentLoaded', function() {
