@@ -1,4 +1,6 @@
 from flask import render_template, flash, redirect, request, jsonify
+from flask_login import current_user, login_required
+from sqlalchemy import func
 from app import app, db
 from app.models import AnalysisResult
 import datetime
@@ -17,17 +19,16 @@ def analysis():
     return render_template('analysisView.html')
 
 @app.route('/save', methods=['GET', 'POST'])
+@login_required
 def save():
-    userLoggedIn = False # change to actually check if user is logged in
-
     data = request.get_json()
 
     analysis = AnalysisResult(
-        id=None,
-        title=None,
-        description=None,
+        id=db.session.query(func.max(AnalysisResult.id)).scalar(),
+        title="default_title",
+        description="default_description",
         createdAt=datetime.datetime.now(),
-        userId=None,
+        userId=current_user.id,
         fileName=data.get('filename'),
         clipLength=data.get('clipLength'),
         maxLevel=data.get('maxLevel'),
@@ -36,16 +37,14 @@ def save():
         fundamentalFrequency=data.get('fundamentalFrequency')
     )
 
-    if userLoggedIn:
-        # complete analysis fields
-        db.session.add(analysis)
-        db.session.commit()
-        return jsonify({'message': 'Analysis saved successfully!'}), 200
-    else:
-        return jsonify({'error': 'User not logged in'}), 401
+    db.session.add(analysis)
+    db.session.commit()
+    return jsonify({'message': 'Analysis saved successfully!'}), 200
+
 
 
 @app.route('/share')
+@login_required
 def share():
     return render_template('shareView.html')
 
