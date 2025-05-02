@@ -16,7 +16,6 @@ function submitSignUp() {
 
 
     localStorage.setItem(email, JSON.stringify(userData));
-    alert("Sign up successful! Redirecting...");
     
     // Get the redirect URL from query parameters
     const urlParams = new URLSearchParams(window.location.search);
@@ -42,3 +41,34 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+    // Add event listener for the sign up button
+    document.getElementById('openSignUpModal').addEventListener('click', function() {
+        // Get form values
+        const email = document.getElementById('signUpEmail').value;
+        const username = document.getElementById('signUpUsername').value;
+        const password = document.getElementById('signUpPassword').value;
+        
+        // Validate form (basic validation)
+        if (!email || !username || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+        
+        // Update confirmation modal with user details
+        document.getElementById('confirmEmail').textContent = email;
+        document.getElementById('confirmUsername').textContent = username;
+        
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById('confirmSignUpModal'));
+        modal.show();
+    });
+    
+    // Add event listener for the confirm button in the modal
+    document.getElementById('confirmSignUp').addEventListener('click', function() {
+        // Call the original submit function
+        submitSignUp();
+        
+        // Hide the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmSignUpModal'));
+        modal.hide();
+    });

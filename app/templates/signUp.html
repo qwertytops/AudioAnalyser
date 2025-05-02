@@ -35,7 +35,7 @@
             </div>
             <small class="form-text text-muted">Password must be at least 8 characters long with letters and numbers</small>
         </div>
-        <button onclick="submitSignUp()" class="btn btn-primary w-100">
+        <button id="openSignUpModal" class="btn btn-primary w-100">
             <i class="fas fa-user-plus me-2"></i>Create Account
         </button>
         <div class="form-footer">
@@ -44,6 +44,33 @@
     </div>
 </div>
 
+<!-- Sign Up Confirmation Modal -->
+<div class="modal fade" id="confirmSignUpModal" tabindex="-1" aria-labelledby="confirmSignUpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmSignUpModalLabel">Confirm Account Creation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Sign Up Successful!</p>
+                <div class="mb-3">
+                    <label class="form-label">Email:</label>
+                    <p id="confirmEmail" class="fw-bold"></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Username:</label>
+                    <p id="confirmUsername" class="fw-bold"></p>
+                </div>
+                <p>By creating an account, you agree to our Terms of Service and Privacy Policy.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmSignUp" class="btn btn-primary">Create Account</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="{{ url_for('static', filename='scripts/signUp.js') }}"></script>
 {% endblock %}
