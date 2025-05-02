@@ -50,6 +50,8 @@ window.addEventListener('DOMContentLoaded', () => {
             fileList.appendChild(li);
         });
         if (!panel) toggleSlidePanel();
+        
+
     });
 
     togglePanel.addEventListener('click', toggleSlidePanel);
@@ -64,4 +66,27 @@ window.addEventListener('DOMContentLoaded', () => {
         arrow.removeAttribute('transform');
         }
     }
+    document.getElementById('analyseButton').addEventListener('click', () => {
+        chosenFiles = fileInput.files;
+        const formData = new FormData();
+        for (let i=0 ; i < chosenFiles.length; i++) {
+            formData.append('files', chosenFiles[i]);
+        }
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.json();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occured while attempting to upload files.');
+        });
+    
+    });
 });
