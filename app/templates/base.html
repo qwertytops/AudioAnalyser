@@ -2,6 +2,14 @@
 <html lang="en" data-bs-theme="light">
 
     <head>
+        <script>
+            // Apply theme immediately before page renders
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+              document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            }
+          </script>
+          
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="Audiometry - Analyze and share audio files">

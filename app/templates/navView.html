@@ -1,5 +1,6 @@
 <script src="{{ url_for('static', filename='scripts/introductoryView.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navView.css') }}">
 
 <nav class="navbar navbar-expand-lg bg=light">
     <div class="container">
@@ -43,7 +44,6 @@
         </div>
     </div>
 </nav>
-
 <script>
     // Get the current page URL
     const currentPage = encodeURIComponent(window.location.href);
@@ -51,4 +51,13 @@
     // Update the login and signup links to include it as a query parameter
     document.getElementById('loginLink').href = `login.html?redirect=${currentPage}`;
     document.getElementById('signUpLink').href = `signUp.html?redirect=${currentPage}`;
+    
+    // Apply saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+    });
 </script>
