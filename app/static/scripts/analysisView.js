@@ -425,7 +425,7 @@ function saveAnalysis() {
             console.log('redirecting to login');
             window.location.href = '/signUp';
         } else {
-            alert('Failed to save analysis.');
+            alert('Failed to save analysis. Response code: ' + response.status);
         }
     })
     .catch((error) => {
