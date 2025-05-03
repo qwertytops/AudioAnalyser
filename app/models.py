@@ -29,7 +29,7 @@ class AnalysisResult(db.Model):
     fundamentalFrequency = db.Column(db.Float, nullable=False)
 
 class SharedResults(db.Model):
-    id = db.Column(db.Integer, primary_key=True, nullable=False, index=True)
+    id = db.Column(db.Integer, primary_key=True, nullable=False, index=True) # update with autoincrement=True
     analysisId = db.Column(db.Integer, db.ForeignKey('analysis_result.id'), nullable=False)
     fromUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     toUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
