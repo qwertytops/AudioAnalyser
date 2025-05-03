@@ -15,14 +15,23 @@
         This page is still in development!
     </div>
 
-    <h2 class="text-center">Uploaded Files</h2>
-    <ul>
-        {% for file in files %}
-            <li>
-                {{ file}}
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="text-center"  style="display: none;">
+        <button id="uploadButton" href = "/upload" class="btn btn-primary btn-lg" >
+            Upload
+        </button>
+    </div>
+
+    
+    <div id = "selector" class="form-group text-center">
+        <h2 class="text-center">Uploaded Files</h2>
+        <label for="fileSelect" class="form-label">Select a file:</label>
+        <select id="fileSelect" class="form-control w-50 mx-auto">
+            <option value="" disabled selected>Select a file</option>
+            {% for file in files %}
+                <option value="{{ file }}">{{ file }}</option>
+            {% endfor %}
+        </select>
+    </div>
 
     <div class="m-4">
         <h5 class="text-center">Parameters</h5>

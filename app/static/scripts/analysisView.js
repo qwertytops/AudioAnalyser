@@ -1,73 +1,71 @@
-let dropZone;
-let fileInput;
-let analyseButton;
-
 const audioCtx = new AudioContext();
 const analyser = audioCtx.createAnalyser();
 let audioSource = null; // To store the current audio source
+let filesInMemory = []; 
+
 
 window.onload = function () {
-    dropZone = document.getElementById('drop-zone');
-    fileInput = document.getElementById('fileInput');
-    analyseButton = document.getElementById('analyseButton');
+    const fileSelect = document.getElementById('fileSelect');
+    const analyseButton = document.getElementById('analyseButton');
 
-    // Event listener for clicking the drop zone
-    dropZone.addEventListener('click', () => {
-        fileInput.click();
-    });
+    const options = fileSelect.options;
+    for (let i = 1; i < options.length; i++) { // skip placeholder and append files to memory
+        filesInMemory.push({ name: options[i].value });
+    }
 
-    // Event listener for dragover
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dragover');
-    });
-
-    // Event listener for dragleave
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dragover');
-    });
-
-    // Event listener for drop
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            displayFileName(files[0]);
+    //implement button to select
+    fileSelect.addEventListener('change', () => {
+        if (fileSelect.value) {
+            analyseButton.disabled = false;
+        } else {
+            analyseButton.disabled = true;
         }
-        analyseButton.disabled = false;
     });
 
-    // Event listener for file input change
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            displayFileName(fileInput.files[0]);
-        }
-        analyseButton.disabled = false;
-    });
-
+    
     analyseButton.addEventListener('click', () => {
-        analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
-        analyseFile();
-    })
+        const selectedFile = fileSelect.value;
+        const file = filesInMemory.find(f => f.name === selectedFile); //get file from memory
+        if (file) {
+            fetchFile(selectedFile).then(fileBlob => {
+                analyseFile(fileBlob, selectedFile); 
+            }).catch(error => {
+                console.error('Error fetching file:', error);
+                alert('Error fetching file from server or file does not exist.');
+            });
+        } else {
+            alert('File not found. Please upload a file first.');
+        }
+    });
 };
 
-function displayFileName(file) {
+
+async function fetchFile(fileName) {
+    const response = await fetch(`/static/uploads/${fileName}`);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch file: ${fileName}`);
+    }
+    return await response.blob();
+}
+
+/**function updateFileList(files) {
+   
+    files.forEach(file => {
+
+       
+    });
+} **/
+
+/**function displayFileName(file) {
     const dropZoneText = document.getElementById('drop-zone-text');
     if (file) {
         dropZoneText.textContent = `Selected ${file.name}`;
     } else {
         dropZoneText.textContent = 'Drag & drop files here or click to browse';
     }
-}
+}**/
 
-function analyseFile() {
-    const file = fileInput.files[0];
-    if (!file) {
-        alert('No file selected');
-        return;
-    }
-
+function analyseFile(fileBlob, fileName) {
     const reader = new FileReader();
 
     reader.onload = function (event) {
@@ -134,7 +132,7 @@ function analyseFile() {
             setupAudioControls(audioBuffer);
 
             // Smoothly scroll to the analyse button
-            analyseButton.scrollIntoView({ behavior: "smooth", block: "start" });
+            document.getElementById('analyseButton').scrollIntoView({ behavior: "smooth", block: "start" });
         }, (error) => {
             console.error('Error decoding audio file:', error);
             alert('Error decoding audio file');
@@ -147,7 +145,7 @@ function analyseFile() {
     };
 
     // Read the file as an ArrayBuffer
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(fileBlob);
 }
 
 function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLevel) {
@@ -439,3 +437,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+
+window.addEventListener('beforeunload', function() {
+    const fileSelect = document.getElementById('fileSelect');
+    const uploadButton = document.getElementById('uploadButton');
+    this.fetch('/cleanupFiles', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action: 'delete_files' }), 
+    }).then(response => {
+        if (!response.ok) {
+            console.error('Error deleting files from the server.');
+        }
+    }).catch(error => {
+        console.error('Error sending delete request:', error);
+    });
+    
+    //if (uploadButton) uploadButton.style.display = 'block';
+    //if (fileSelect) fileSelect.style.display = 'none';
+} );

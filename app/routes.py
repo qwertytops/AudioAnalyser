@@ -37,12 +37,21 @@ def analysis():
     sentFiles = request.args.get('files')
     if sentFiles:
         files = sentFiles.split(',')
-        # TODO: letting analysis handle files onclick
         return render_template('analysisView.html', files=files)
     else:
         flash('No files uploaded')
 
     return render_template('analysisView.html')
+
+@app.route('/cleanupFiles', methods=['POST'])
+def cleanupFiles():
+    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+        filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            if os.path.isfile(filePath):
+                os.unlink(filePath)
+        except Exception as e:
+            print(e)
 
 @app.route('/share')
 def share():
