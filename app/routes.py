@@ -56,3 +56,6 @@ def share():
 def signUp():
     return render_template('signUp.html')
 
+@app.route('/account')
+def account():
+    return render_template('accountView.html')

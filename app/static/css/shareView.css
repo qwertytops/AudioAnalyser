@@ -1,0 +1,371 @@
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --accent-color: #4895ef;
+    --light-bg: #f8f9fa;
+    --dark-bg: #1f1f1f;
+    --light-container: #ffffff;
+    --dark-container: #1c1c1c;
+    --light-sidebar: #f8f9fa;
+    --dark-sidebar: #2b3035;
+    --light-border: #ddd;
+    --dark-border: #343a40;
+    --light-text: #333;
+    --dark-text: #f8f9fa;
+    --light-data-bg: #f8f9fa;
+    --dark-data-bg: #2b3035;
+    --transition-speed: 0.5s;
+}
+
+/* Add transitions to all elements */
+* {
+    transition: background-color var(--transition-speed) ease,
+                color var(--transition-speed) ease,
+                border-color var(--transition-speed) ease,
+                box-shadow var(--transition-speed) ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--light-bg) 0%, #8ca6ec 100%);
+    min-height: 100vh;
+}
+
+/* Dark mode for body background */
+[data-bs-theme="dark"] body {
+    background: linear-gradient(135deg, #1f1f1f 0%, #2d3345 100%);
+    color: var(--dark-text);
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: inherit;
+}
+
+.sidebar-Container {
+    background-color: var(--light-container);
+    width: 100%;
+    max-width: 1200px;
+    min-height: 700px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    overflow: hidden;
+}
+
+/* Dark mode for sidebar container */
+[data-bs-theme="dark"] .sidebar-Container {
+    background-color: var(--dark-container);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar {
+    width: 220px;
+    background-color: var(--light-sidebar);
+    border-right: 1px solid var(--light-border);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Dark mode for sidebar */
+[data-bs-theme="dark"] .sidebar {
+    background-color: var(--dark-sidebar);
+    border-right: 1px solid var(--dark-border);
+}
+
+.sidebar-Title {
+    display: flex;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 0 20px 15px 20px;
+    margin-bottom: 15px;
+    color: var(--light-text);
+    border-bottom: 1px solid var(--light-border);
+}
+
+/* Dark mode for sidebar title */
+[data-bs-theme="dark"] .sidebar-Title {
+    color: var(--dark-text);
+    border-bottom: 1px solid var(--dark-border);
+}
+
+.sidebar-List {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-list {
+    background-color: #e9ecef;
+}
+
+/* Dark mode for sidebar list */
+[data-bs-theme="dark"] .sidebar-list {
+    background-color: #2b3035;
+}
+
+.sidebar-Option {
+    padding: 10px 20px;
+    cursor: pointer;
+    color: var(--light-text);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* Dark mode for sidebar options */
+[data-bs-theme="dark"] .sidebar-Option {
+    color: var(--dark-text);
+}
+
+.sidebar-Option.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.sidebar-Option:hover {
+    background-color: #ddd;
+}
+
+/* Dark mode for sidebar option hover */
+[data-bs-theme="dark"] .sidebar-Option:hover {
+    background-color: #343a40;
+}
+
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background-color: var(--light-container);
+}
+
+/* Dark mode for content */
+[data-bs-theme="dark"] .content {
+    background-color: var(--dark-container);
+}
+
+.section {
+    display: none;
+    background: var(--light-container);
+    padding: 20px;
+}
+
+/* Dark mode for section */
+[data-bs-theme="dark"] .section {
+    background: var(--dark-container);
+}
+
+.section h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--light-text);
+}
+
+/* Dark mode for section headers */
+[data-bs-theme="dark"] .section h1 {
+    color: var(--dark-text);
+}
+
+.section.active {
+    display: block;
+}
+
+.analysis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.data {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    background-color: var(--light-data-bg);
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+/* Dark mode for data boxes */
+[data-bs-theme="dark"] .data {
+    background-color: var(--dark-data-bg);
+}
+
+.data-label {
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+/* Dark mode for data labels */
+[data-bs-theme="dark"] .data-label {
+    color: #adb5bd;
+}
+
+.data-value {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Dark mode for data values */
+[data-bs-theme="dark"] .data-value {
+    color: #e9ecef;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Dark mode for paragraph text */
+[data-bs-theme="dark"] p {
+    color: var(--dark-text);
+}
+
+textarea, .analysis-select {
+    width: 60%;
+    max-width: 500px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Dark mode for textarea and select */
+[data-bs-theme="dark"] textarea, 
+[data-bs-theme="dark"] .analysis-select {
+    background-color: #212529;
+    border-color: #495057;
+    color: #e9ecef;
+}
+
+.friend {
+    display: flex;
+    flex-direction: center;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; 
+    margin-top: 20px;
+}
+  
+.friend-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--light-text);
+}
+
+/* Dark mode for friend label */
+[data-bs-theme="dark"] .friend-label {
+    color: var(--dark-text);
+}
+  
+.friend-select {
+    margin-left: none;
+    width: 250px; 
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    appearance: none;
+}
+
+/* Dark mode for friend select */
+[data-bs-theme="dark"] .friend-select {
+    background-color: #212529;
+    border-color: #495057;
+    color: #e9ecef;
+}
+  
+.friend-select:focus {
+    border-color: #4285f4;
+    outline: none;
+    box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+}
+ 
+#shareButton:hover {
+    background: #3367d6;
+}
+
+.shareButton {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#shareButton {
+    display: flex;
+    flex-direction: center;
+    align-items: center;
+    background: #4285f4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+#bell {
+    margin-right: 20px;
+}
+
+#shareIcon {
+    margin-right: 18px;
+}
+
+.notBell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    margin-top: 100px;
+}
+
+/* Dark mode for notification text */
+[data-bs-theme="dark"] .notBell p {
+    color: #adb5bd;
+}
+
+#oscilloscope {
+    border: 1px solid var(--light-border);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 100%;
+    height: 100px;
+    display: block;
+    margin: 0 auto;
+    background-color: #fff;
+}
+
+/* Dark mode for oscilloscope */
+[data-bs-theme="dark"] #oscilloscope {
+    border-color: var(--dark-border);
+    background-color: #212529;
+}
+
+.sum {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    color: var(--light-text);
+}
+
+/* Dark mode for summary text */
+[data-bs-theme="dark"] .sum {
+    color: var(--dark-text);
+}

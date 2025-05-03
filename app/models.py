@@ -19,7 +19,7 @@ class AnalysisResult(db.Model):
     description = db.Column(db.String(512), nullable=True)
     createdAt = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
 
-    userId = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     fileName = db.Column(db.String(256), nullable=False)
     clipLength = db.Column(db.Float, nullable=False)
@@ -29,8 +29,8 @@ class AnalysisResult(db.Model):
     fundamentalFrequency = db.Column(db.Float, nullable=False)
 
 class SharedResults(db.Model):
-    id = db.Column(db.Integer, primary_key=True, nullable=False, index=True) # update with autoincrement=True
-    analysisId = db.Column(db.Integer, db.ForeignKey('AnalysisResult.id'), nullable=False)
-    fromUser = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
-    toUser = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, nullable=False, index=True)
+    analysisId = db.Column(db.Integer, db.ForeignKey('analysis_result.id'), nullable=False)
+    fromUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    toUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     date = db.Column(db.DateTime, nullable=False)

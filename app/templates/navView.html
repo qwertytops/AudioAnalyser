@@ -1,9 +1,10 @@
 <script src="{{ url_for('static', filename='scripts/introductoryView.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navView.css') }}">
 
 <nav class="navbar navbar-expand-lg bg=light">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
+        <a class="navbar-brand d-flex align-items-center" href="/">
             Audiometry <i class="fas fa-microphone-lines ms-2"></i>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -27,9 +28,8 @@
                 </li>
             </ul>
             <div class="d-flex align-items-center" id="right">
-                <a href="introductoryView.html" class="text-decoration-none">Log In</a>
-
-                <a href="signUp.html" class="btn btn-outline-primary">Sign Up</a>
+                <a href="/" class="text-decoration-none" id="loginLink">Log In</a>
+                <a href="/signUp" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
             </div>
 
             <!-- Dark Mode Toggle Button -->
@@ -43,12 +43,24 @@
         </div>
     </div>
 </nav>
-
 <script>
     // Get the current page URL
-    const currentPage = encodeURIComponent(window.location.href);
-
-    // Update the login and signup links to include it as a query parameter
-    document.getElementById('loginLink').href = `login.html?redirect=${currentPage}`;
-    document.getElementById('signUpLink').href = `signUp.html?redirect=${currentPage}`;
+    const currentPage = window.location.pathname;
+    
+    // Update the signup link to include redirect info if we're not already on the signup page
+    if (currentPage !== '/signUp') {
+        const signUpLink = document.getElementById('signUpLink');
+        if (signUpLink) {
+            signUpLink.href = `/signUp?redirect=${encodeURIComponent(currentPage)}`;
+        }
+    }
+    
+    // Apply saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+    });
 </script>
