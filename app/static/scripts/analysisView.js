@@ -22,7 +22,6 @@ window.onload = function () {
         }
     });
 
-    
     analyseButton.addEventListener('click', () => {
         const selectedFile = fileSelect.value;
         const file = filesInMemory.find(f => f.name === selectedFile); //get file from memory
@@ -31,10 +30,10 @@ window.onload = function () {
                 analyseFile(fileBlob, selectedFile); 
             }).catch(error => {
                 console.error('Error fetching file:', error);
-                alert('Error fetching file from server or file does not exist.');
+                alert('Error fetching file from server or file does not exist. Please upload a file first.');
             });
         } else {
-            alert('File not found. Please upload a file first.');
+            alert('Error');
         }
     });
 };
@@ -454,6 +453,8 @@ window.addEventListener('beforeunload', function() {
     }).catch(error => {
         console.error('Error sending delete request:', error);
     });
+
+    
     
     //if (uploadButton) uploadButton.style.display = 'block';
     //if (fileSelect) fileSelect.style.display = 'none';

@@ -1,13 +1,9 @@
-from flask import render_template, flash, redirect, request, url_for
+from flask import render_template, flash, redirect, request, url_for, jsonify
 import os
 from app import app
 
 uploadFolder = 'app/static/uploads/'
 app.config['UPLOAD_FOLDER'] = uploadFolder
-
-
-
-
 @app.route('/')
 @app.route('/index')
 def index():
@@ -45,14 +41,16 @@ def analysis():
 
 @app.route('/cleanupFiles', methods=['POST'])
 def cleanupFiles():
-    for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-        filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        try:
+    try:
+        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+            filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             if os.path.isfile(filePath):
                 os.unlink(filePath)
-        except Exception as e:
-            print(e)
-
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error"}), 500
+        
 @app.route('/share')
 def share():
     return render_template('shareView.html')
