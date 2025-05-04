@@ -27,7 +27,7 @@ def signUp():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        #passwordHash = generate_password_hash(password, method='sha256')
+        passwordHash = generate_password_hash(password)
         createdAt = datetime.now()
         updatedAt = datetime.now()
 
@@ -41,7 +41,7 @@ def signUp():
             flash(f'Email "{email}" is already registered. Please use another email or try to log in.', 'danger')
             return render_template('signUp.html')
 
-        new_user = User(username=username, email=email, passwordHash=password, createdAt=createdAt, updatedAt=updatedAt)
+        new_user = User(username=username, email=email, passwordHash=passwordHash, createdAt=createdAt, updatedAt=updatedAt)
         db.session.add(new_user)
         db.session.commit()
 
