@@ -2,25 +2,6 @@
 
 {% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
-<style>
-  /* Add additional styling to ensure form visibility */
-  .auth-form {
-    display: block !important;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    background-color: var(--bs-body-bg);
-  }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -43,7 +24,7 @@
       {% endif %}
     {% endwith %}
     
-    <form action="{{ url_for('signUp') }}" method="POST" id="signUpForm" class="auth-form">
+    <form action="{{ url_for('signUp') }}" method="POST" id="signUpForm" class="auth-form" novalidate>
         <h3 class="text-center mb-4">Join Audiometry</h3>
         
         <!-- Hidden input for the referrer -->
@@ -55,13 +36,19 @@
                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                 <input type="email" name="email" id="signUpEmail" class="form-control" placeholder="Enter your email" required>
             </div>
+            <div class="invalid-feedback">
+                Please enter a valid email address.
+            </div>
         </div>
         
         <div class="form-group">
             <label for="signUpUsername" class="form-label">Username</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-user"></i></span>
-                <input type="text" name="username" id="signUpUsername" class="form-control" placeholder="Create a username" required>
+                <input type="text" name="username" id="signUpUsername" class="form-control" placeholder="Create a username" required minlength="3">
+            </div>
+            <div class="invalid-feedback">
+                Please choose a username (minimum 3 characters).
             </div>
         </div>
         
@@ -71,7 +58,24 @@
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 <input type="password" name="password" id="signUpPassword" class="form-control" placeholder="Create a password" required minlength="8">
             </div>
-            <small class="form-text text-muted">Password must be at least 8 characters long with letters and numbers</small>
+            <div class="invalid-feedback">
+                Password must be at least 8 characters with letters and numbers.
+            </div>
+            <div class="password-requirements text-muted">
+                <p class="mb-1">Password must contain:</p>
+                <div class="requirement" id="req-length">
+                    <i class="fas fa-times-circle text-danger"></i>
+                    <span>At least 8 characters</span>
+                </div>
+                <div class="requirement" id="req-letter">
+                    <i class="fas fa-times-circle text-danger"></i>
+                    <span>At least one letter</span>
+                </div>
+                <div class="requirement" id="req-number">
+                    <i class="fas fa-times-circle text-danger"></i>
+                    <span>At least one number</span>
+                </div>
+            </div>
         </div>
         
         <button type="button" id="createAccountBtn" class="btn btn-primary w-100">
