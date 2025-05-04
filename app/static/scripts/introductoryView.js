@@ -92,3 +92,14 @@ function updateThemeIcon(theme) {
         }
     });
 }
+
+// Check URL parameters on page load to see if login form should be shown
+document.addEventListener('DOMContentLoaded', function() {
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Check if showLogin parameter exists
+    if (urlParams.get('showLogin') === 'true') {
+        showLogInForm();
+    }
+});
