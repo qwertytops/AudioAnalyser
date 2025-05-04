@@ -1,3 +1,4 @@
+// Function to handle the final form submission
 function submitSignUp() {
     const username = document.getElementById("signUpUsername").value;
     const password = document.getElementById("signUpPassword").value;
@@ -8,41 +9,25 @@ function submitSignUp() {
         return;
     }
 
-    const userData = {
-        username: username,
-        password: password,
-        email: email
-    };
-
-
-    localStorage.setItem(email, JSON.stringify(userData));
-    
-    // Get the redirect URL from query parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
-    
-    // Default to the referring page if no redirect parameter, and home page as a fallback
-    const destinationUrl = redirectUrl || document.referrer || "/";
-    
-    // Redirect the user
-    window.location.href = destinationUrl;
+    // Submit the form to the server
+    document.getElementById("signUpForm").submit();
 }
 
-// On page load, store the referring page in a hidden input
 document.addEventListener('DOMContentLoaded', function() {
-    // Create a hidden input to store the referring page if it doesn't exist
+    // Store the referring page in a hidden input if it doesn't exist
     if (!document.getElementById('referrerPage')) {
         const referrerInput = document.createElement('input');
         referrerInput.type = 'hidden';
         referrerInput.id = 'referrerPage';
+        referrerInput.name = 'referrer'; // Give it a name so it's included in form submission
         referrerInput.value = document.referrer || "/";
-        document.getElementById('signUpForm').appendChild(referrerInput);
+        document.querySelector('form').appendChild(referrerInput);
     }
-});
 
-
-    // Add event listener for the sign up button
-    document.getElementById('openSignUpModal').addEventListener('click', function() {
+    // Add event listener for the "Create Account" button
+    document.getElementById('createAccountBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        
         // Get form values
         const email = document.getElementById('signUpEmail').value;
         const username = document.getElementById('signUpUsername').value;
@@ -65,10 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listener for the confirm button in the modal
     document.getElementById('confirmSignUp').addEventListener('click', function() {
-        // Call the original submit function
-        submitSignUp();
-        
-        // Hide the modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmSignUpModal'));
-        modal.hide();
+        // Submit the form to the server
+        document.querySelector('form').submit();
     });
+});

@@ -29,7 +29,7 @@
             </ul>
             <div class="d-flex align-items-center" id="right">
                 <a href="/" class="text-decoration-none" id="loginLink">Log In</a>
-                <a href="/signUp" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
+                <a href="{{ url_for('signUp') }}" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
             </div>
 
             <!-- Dark Mode Toggle Button -->
@@ -43,24 +43,25 @@
         </div>
     </div>
 </nav>
+
 <script>
-    // Get the current page URL
-    const currentPage = window.location.pathname;
+
+// Apply saved theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
     
     // Update the signup link to include redirect info if we're not already on the signup page
+    const currentPage = window.location.pathname;
     if (currentPage !== '/signUp') {
         const signUpLink = document.getElementById('signUpLink');
         if (signUpLink) {
-            signUpLink.href = `/signUp?redirect=${encodeURIComponent(currentPage)}`;
+            signUpLink.href = "{{ url_for('signUp') }}?redirect=" + encodeURIComponent(currentPage);
         }
     }
-    
-    // Apply saved theme on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-bs-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-        }
-    });
+});
 </script>
