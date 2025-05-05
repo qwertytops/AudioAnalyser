@@ -114,7 +114,7 @@
                             {% for analysis in myAnalyses %}
                             <div class="history-item">
                                 <div class="history-item-header d-flex justify-content-between align-items-center">
-                                    <h6>{{ analysis.filename }}</h6>
+                                    <h6>{{ analysis.fileName }}</h6>
                                     <span class="badge bg-primary">{{ analysis.createdAt }}</span>
                                 </div>
                                 <div class="history-item-details">
@@ -122,19 +122,19 @@
                                         <div class="col-md-4">
                                             <div class="history-detail">
                                                 <small class="text-muted">Length</small>
-                                                <p>{{ analysis.clipLength }}s</p>
+                                                <p>{{ analysis.clipLength|round(2) }}s</p>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="history-detail">
                                                 <small class="text-muted">Max Level</small>
-                                                <p>{{ analysis.maxLevel }} dBFS</p>
+                                                <p>{{ analysis.maxLevel|round(2) }} dBFS</p>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="history-detail">
                                                 <small class="text-muted">Fundamental</small>
-                                                <p>{{ analysis.fundamentalFrequency }}</p>
+                                                <p>{{ analysis.fundamentalFrequency|round(2) }}</p>
                                             </div>
                                         </div>
                                     </div>
