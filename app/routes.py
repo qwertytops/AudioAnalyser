@@ -1,12 +1,13 @@
 
 from flask import render_template, flash, redirect, url_for, session, request, jsonify
-from flask_login import current_user, login_required
+from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 from app import app, db
 from app.models import User, AnalysisResult
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import re
+import os
 
 
 
@@ -167,54 +168,55 @@ def signUp():
     
     return render_template('signUp.html')
 
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Extract data from request
-        data = request.get_json()
+        login_id = request.form.get('loginId')
+        password = request.form.get('password')
         
-        if not data:
-            return jsonify({'success': False, 'message': 'No input data provided'}), 400
+        # Validate input
+        errors = []
+        if not login_id:
+            errors.append('Please enter your username or email.')
+        if not password:
+            errors.append('Please enter your password.')
+            
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
+            return render_template('introductoryView.html')
         
-        username = data.get('username')
-        password = data.get('password')
-        
-        if not username or not password:
-            return jsonify({'success': False, 'message': 'Missing username or password'}), 400
-        
-        # Look up user in database
-        user = User.query.filter_by(username=username).first()
+        # Check if login_id is an email or username
+        if '@' in login_id:
+            # Look up user by email
+            user = User.query.filter_by(email=login_id).first()
+        else:
+            # Look up user by username
+            user = User.query.filter_by(username=login_id).first()
         
         # Check if user exists and password is correct
-        if user and check_password_hash(user.passwordHash, password):
-            # Set up user session
+        from app.passwordHashing import verify_password
+        if user and verify_password(password, user.passwordHash):
+            # Log in the user with Flask-Login
+            login_user(user)
+            
+            # Set session variables
             session['user_id'] = user.id
             session['username'] = user.username
             
-            # For flask-login, if you're using it
-            from flask_login import login_user
-            login_user(user)
+            flash('Login successful!', 'success')
             
-            # Prepare user data to return (exclude sensitive info)
-            user_data = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                # Add other non-sensitive fields you might need
-            }
+            # Redirect to the requested page or default to index
+            next_page = request.args.get('next')
+            if not next_page or not next_page.startswith('/'):
+                next_page = url_for('index')
+                
+            return redirect(next_page)
+        else:
+            flash('Invalid username/email or password. Please try again.', 'danger')
             
-            return jsonify({
-                'success': True, 
-                'message': 'Login successful',
-                'user': user_data
-            })
-        
-        # Authentication failed
-        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
-    
-    # Should not reach here with API calls, but just in case
-    return jsonify({'success': False, 'message': 'Only POST method is allowed'}), 405
-
+    # If GET request or login failed, show the login form
+    return render_template('introductoryView.html')
 
 @app.route('/logout')
 def logout():
@@ -222,8 +224,8 @@ def logout():
     session.pop('user_id', None)
     session.pop('username', None)
     
-    # For flask-login, if you're using it
-    from flask_login import logout_user
+    # For flask-login
     logout_user()
     
+    # Redirect to home page
     return redirect(url_for('index'))
