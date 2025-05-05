@@ -4,10 +4,9 @@ from sqlalchemy import func
 from app import app, db
 from app.models import User, AnalysisResult
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+import datetime
 import re
 import os
-import datetime
 
 
 uploadFolder = 'app/static/uploads/'
@@ -157,8 +156,8 @@ def signUp():
         
         # If validation passes, create the new user
         passwordHash = generate_password_hash(password)
-        createdAt = datetime.now()
-        updatedAt = datetime.now()
+        createdAt = datetime.datetime.now()
+        updatedAt = datetime.datetime.now()
 
         new_user = User(username=username, email=email, passwordHash=passwordHash, createdAt=createdAt, updatedAt=updatedAt)
         db.session.add(new_user)
