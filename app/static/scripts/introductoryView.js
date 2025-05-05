@@ -245,12 +245,17 @@ function updateThemeIcon(theme) {
 
 // Check URL parameters on page load to see if login form should be shown
 document.addEventListener('DOMContentLoaded', function() {
-    // Get URL parameters
+    // Check URL parameters - ONLY open login form if explicitly requested
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Check if showLogin parameter exists
     if (urlParams.get('showLogin') === 'true') {
         showLogInForm();
+    } else {
+        // Make sure login form is hidden by default
+        const loginForm = document.getElementById('logInForm');
+        if (loginForm) {
+            loginForm.style.display = 'none';
+        }
     }
 });
 
