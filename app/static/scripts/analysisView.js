@@ -3,6 +3,7 @@ const analyser = audioCtx.createAnalyser();
 let audioSource = null; // To store the current audio source
 let filesInMemory = [];
 let currentAudioBuffer = null;
+let analysisResult = [];
 
 window.onload = function () {
     const fileSelect = document.getElementById('fileSelect');
@@ -183,19 +184,25 @@ function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLeve
     // const signalLevel = 20 * Math.log10(maxAmplitude / 255);
     // console.log(maxAmplitude, maxAmplitude / 255, Math.log10(maxAmplitude / 255), signalLevel);
     const signalLevel = maxLevel;
+
+    analysisResult.signalLevel = signalLevel;
+    analysisResult.highestFrequency = highestFrequency;
+    analysisResult.lowestFrequency = lowestFrequency;
+    analysisResult.duration = duration;
+    analysisResult.fundamentalFrequency = fundamentalFrequency;
     
-    updateDataArea(signalLevel, highestFrequency, lowestFrequency, duration, fundamentalFrequency);
+    updateDataArea();
 }
 
-function updateDataArea(signalLevel,highestFrequency, lowestFrequency, clipLength, fundamentalFrequency) {
-    document.getElementById("max-db").textContent = signalLevel.toFixed(2) + " dB";
-    document.getElementById("highest-frequency").textContent = highestFrequency.toFixed(2);
-    document.getElementById("highest-pitch").textContent = frequencyToPitchStr(highestFrequency);
-    document.getElementById("lowest-frequency").textContent = lowestFrequency.toFixed(2);
-    document.getElementById("lowest-pitch").textContent = frequencyToPitchStr(lowestFrequency);
-    document.getElementById("clip-length").textContent = clipLength.toFixed(2);
-    document.getElementById("fundamental-frequency").textContent = fundamentalFrequency.toFixed(2);
-    document.getElementById("fundamental-pitch").textContent = frequencyToPitchStr(fundamentalFrequency);
+function updateDataArea() {
+    document.getElementById("max-db").textContent = analysisResult.signalLevel.toFixed(2) + " dB";
+    document.getElementById("highest-frequency").textContent = analysisResult.highestFrequency.toFixed(2);
+    document.getElementById("highest-pitch").textContent = frequencyToPitchStr(analysisResult.highestFrequency);
+    document.getElementById("lowest-frequency").textContent = analysisResult.lowestFrequency.toFixed(2);
+    document.getElementById("lowest-pitch").textContent = frequencyToPitchStr(analysisResult.lowestFrequency);
+    document.getElementById("clip-length").textContent = analysisResult.duration.toFixed(2);
+    document.getElementById("fundamental-frequency").textContent = analysisResult.fundamentalFrequency.toFixed(2);
+    document.getElementById("fundamental-pitch").textContent = frequencyToPitchStr(analysisResult.fundamentalFrequency);
 }
 
 function frequencyToPitchStr(frequency) {
@@ -391,13 +398,13 @@ function calculateDBFSFloat(analyser) {
 
 function saveAnalysis() {
     const analysisData = {
-        filename: document.getElementById('drop-zone-text').textContent.replace('Selected ', ''),
+        filename: document.getElementById('fileSelect').value,
         frequencyArray: Array.from(currentAudioBuffer.getChannelData(0)),
-        clipLength: document.getElementById('clip-length').textContent,
-        maxLevel: document.getElementById('max-db').textContent,
-        highestFrequency: document.getElementById('highest-frequency').textContent,
-        lowestFrequency: document.getElementById('lowest-frequency').textContent,
-        fundamentalFrequency: document.getElementById('fundamental-frequency').textContent,
+        clipLength: analysisResult.duration,
+        maxLevel: analysisResult.signalLevel,
+        highestFrequency: analysisResult.highestFrequency,
+        lowestFrequency: analysisResult.lowestFrequency,
+        fundamentalFrequency: analysisResult.fundamentalFrequency,
     };
 
     console.log('Saving analysis:', analysisData);
