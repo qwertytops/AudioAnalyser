@@ -324,7 +324,7 @@ body {
     color: #ffffff;
 }
 .auth-form {
-    display: block !important;
+    display: block;
     margin-top: 2rem;
     margin-bottom: 2rem;
     max-width: 500px;

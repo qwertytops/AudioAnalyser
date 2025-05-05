@@ -12,15 +12,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update UI based on session state
     updateNavbarForLoggedInUser();
+    updateMainPageForLoggedInUser(); // Add this new function call
 });
 
 // Function to update navigation UI for logged-in user
 function updateNavbarForLoggedInUser() {
     // This will be handled server-side with Jinja templates
     // No JavaScript needed for this part when using server-side sessions
+}
 
-    
-}function submitLogIn() {
+function submitLogIn() {
     // Get user input values
     const loginId = document.getElementById('logInEmail').value.trim();
     const password = document.getElementById('logInPassword').value;
@@ -146,6 +147,45 @@ function updateUIForLoggedInUser(userData) {
         rightNavSection.appendChild(welcomeSpan);
         rightNavSection.appendChild(logoutLink);
     }
+    
+    // Update main page auth buttons
+    updateMainPageForLoggedInUser();
+}
+
+// New function to update main page UI for logged-in users
+function updateMainPageForLoggedInUser() {
+    const userData = localStorage.getItem('userData');
+    const isLoggedIn = userData || (document.querySelector('#right span.me-3') !== null);
+    
+    // Find main page auth buttons container
+    const authButtonsContainer = document.querySelector('.auth-buttons');
+    if (authButtonsContainer) {
+        if (isLoggedIn) {
+            // Hide the login/signup buttons on main page
+            authButtonsContainer.style.display = 'none';
+            
+            // Optionally show a message or different content for logged-in users
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.className = 'text-center mb-4';
+            welcomeMessage.innerHTML = '<p class="lead">You\'re logged in! Explore our features below or head to the <a href="/upload">Upload page</a> to analyze your audio files.</p>';
+            
+            // Insert the welcome message before the features section
+            const featuresSection = document.querySelector('.features-section');
+            if (featuresSection && !document.querySelector('.logged-in-message')) {
+                welcomeMessage.classList.add('logged-in-message');
+                authButtonsContainer.parentNode.insertBefore(welcomeMessage, featuresSection);
+            }
+        } else {
+            // Ensure buttons are visible if user is not logged in
+            authButtonsContainer.style.display = 'flex';
+            
+            // Remove any welcome message if it exists
+            const welcomeMessage = document.querySelector('.logged-in-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+        }
+    }
 }
 
 // Check if user is logged in on page load
@@ -167,6 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showLogInForm();
     }
 });
+
 // Helper function to display login messages
 function displayLoginMessage(message, type) {
     // Create message element if it doesn't exist
@@ -245,12 +286,17 @@ function updateThemeIcon(theme) {
 
 // Check URL parameters on page load to see if login form should be shown
 document.addEventListener('DOMContentLoaded', function() {
-    // Get URL parameters
+    // Check URL parameters - ONLY open login form if explicitly requested
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Check if showLogin parameter exists
     if (urlParams.get('showLogin') === 'true') {
         showLogInForm();
+    } else {
+        // Make sure login form is hidden by default
+        const loginForm = document.getElementById('logInForm');
+        if (loginForm) {
+            loginForm.style.display = 'none';
+        }
     }
 });
 
