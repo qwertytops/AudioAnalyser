@@ -4,12 +4,12 @@ function showLogInForm() {
 
 function submitLogIn() {
     // Get user input values
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
+    const username = document.getElementById('logInEmail').value.trim();
+    const password = document.getElementById('logInPassword').value;
     
     // Validate input
     if (!username || !password) {
-        displayLoginMessage('Please enter both username and password', 'error');
+        displayLoginMessage('Please enter both email and password', 'error');
         return;
     }
     
@@ -49,7 +49,7 @@ function submitLogIn() {
             }, 1500);
         } else {
             // Login failed
-            displayLoginMessage(data.message || 'Invalid username or password', 'error');
+            displayLoginMessage(data.message || 'Invalid email or password', 'error');
         }
     })
     .catch(error => {
@@ -60,13 +60,31 @@ function submitLogIn() {
 
 // Helper function to display login messages
 function displayLoginMessage(message, type) {
-    const messageElement = document.getElementById('loginMessage');
-    if (messageElement) {
-        messageElement.textContent = message;
-        messageElement.className = ''; // Reset classes
-        messageElement.classList.add(`message-${type}`);
-        messageElement.style.display = 'block';
+    // Create message element if it doesn't exist
+    let messageElement = document.getElementById('loginMessage');
+    if (!messageElement) {
+        messageElement = document.createElement('div');
+        messageElement.id = 'loginMessage';
+        messageElement.className = 'alert mt-3';
+        const formElement = document.getElementById('logInForm');
+        formElement.appendChild(messageElement);
     }
+    
+    // Set message content and style
+    messageElement.textContent = message;
+    messageElement.className = 'alert mt-3'; // Reset classes
+    
+    // Add appropriate Bootstrap alert class based on message type
+    if (type === 'error') {
+        messageElement.classList.add('alert-danger');
+    } else if (type === 'success') {
+        messageElement.classList.add('alert-success');
+    } else if (type === 'info') {
+        messageElement.classList.add('alert-info');
+    }
+    
+    // Make sure it's visible
+    messageElement.style.display = 'block';
 }
 
 function toggleTheme() {
