@@ -5,3 +5,5 @@ flask-WTF
 python-dotenv
 flask-sqlalchemy
 flask-migrate
+flask_login
+werkzeug
