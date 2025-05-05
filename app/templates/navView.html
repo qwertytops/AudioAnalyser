@@ -28,8 +28,15 @@
                 </li>
             </ul>
             <div class="d-flex align-items-center" id="right">
+                {% if current_user.is_authenticated %}
+                <span class="me-3">Welcome, {{ current_user.username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+                {% else %}
                 <a href="/?showLogin=true" class="text-decoration-none" id="loginLink" onclick="showLogInForm()">Log In</a>
                 <a href="{{ url_for('signUp') }}" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
+                {% endif %}
             </div>
 
             <!-- Dark Mode Toggle Button -->
