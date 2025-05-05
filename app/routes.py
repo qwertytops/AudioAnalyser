@@ -166,3 +166,64 @@ def signUp():
         return redirect(redirect_url)
     
     return render_template('signUp.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        # Extract data from request
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'success': False, 'message': 'No input data provided'}), 400
+        
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Missing username or password'}), 400
+        
+        # Look up user in database
+        user = User.query.filter_by(username=username).first()
+        
+        # Check if user exists and password is correct
+        if user and check_password_hash(user.passwordHash, password):
+            # Set up user session
+            session['user_id'] = user.id
+            session['username'] = user.username
+            
+            # For flask-login, if you're using it
+            from flask_login import login_user
+            login_user(user)
+            
+            # Prepare user data to return (exclude sensitive info)
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                # Add other non-sensitive fields you might need
+            }
+            
+            return jsonify({
+                'success': True, 
+                'message': 'Login successful',
+                'user': user_data
+            })
+        
+        # Authentication failed
+        return jsonify({'success': False, 'message': 'Invalid username or password'}), 401
+    
+    # Should not reach here with API calls, but just in case
+    return jsonify({'success': False, 'message': 'Only POST method is allowed'}), 405
+
+
+@app.route('/logout')
+def logout():
+    # Clear user session
+    session.pop('user_id', None)
+    session.pop('username', None)
+    
+    # For flask-login, if you're using it
+    from flask_login import logout_user
+    logout_user()
+    
+    return redirect(url_for('index'))
