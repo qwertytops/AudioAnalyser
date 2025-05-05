@@ -323,6 +323,58 @@ body {
 .feature-card:hover .feature-icon {
     color: #ffffff;
 }
+.auth-form {
+    display: block !important;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    background-color: var(--bs-body-bg);
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Validation styles */
+  .password-requirements {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
+  .requirement {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+  }
+  
+  .requirement i {
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .invalid-feedback {
+    display: none;
+    color: #dc3545;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .is-invalid ~ .invalid-feedback {
+    display: block;
+  }
+  
+  .is-invalid {
+    border-color: #dc3545;
+  }
+  
+  .is-valid {
+    border-color: #198754;
+  }
 
 /* Dark mode support */
 [data-bs-theme="dark"] {
