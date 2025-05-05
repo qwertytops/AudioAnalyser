@@ -1,48 +1,137 @@
-function submitSignUp() {
-    const username = document.getElementById("signUpUsername").value;
-    const password = document.getElementById("signUpPassword").value;
-    const email = document.getElementById("signUpEmail").value;
-
-    if (username === "" || password === "" || email === "") {
-        alert("Please fill in all fields.");
-        return;
-    }
-
-    const userData = {
-        username: username,
-        password: password,
-        email: email
-    };
-
-
-    localStorage.setItem(email, JSON.stringify(userData));
-    
-    // Get the redirect URL from query parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirectUrl = urlParams.get('redirect');
-    
-    // Default to the referring page if no redirect parameter, and home page as a fallback
-    const destinationUrl = redirectUrl || document.referrer || "/";
-    
-    // Redirect the user
-    window.location.href = destinationUrl;
+// Function to validate email format
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 
-// On page load, store the referring page in a hidden input
+// Function to validate password requirements
+function isValidPassword(password) {
+    // Minimum 8 characters, contains at least one letter and one number
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    return passwordRegex.test(password);
+}
+
+// Function to display validation errors
+function showValidationError(inputId, message) {
+    const input = document.getElementById(inputId);
+    const errorId = `${inputId}Error`;
+    
+    // Remove any existing error message
+    const existingError = document.getElementById(errorId);
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Create and add new error message
+    const errorElement = document.createElement('div');
+    errorElement.className = 'invalid-feedback d-block';
+    errorElement.id = errorId;
+    errorElement.textContent = message;
+    
+    // Add error styling to input
+    input.classList.add('is-invalid');
+    
+    // Insert error message after input's parent (input-group)
+    input.parentElement.after(errorElement);
+}
+
+// Function to clear validation errors
+function clearValidationError(inputId) {
+    const input = document.getElementById(inputId);
+    const errorId = `${inputId}Error`;
+    
+    // Remove error message if it exists
+    const existingError = document.getElementById(errorId);
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Remove error styling
+    input.classList.remove('is-invalid');
+    input.classList.add('is-valid');
+}
+
+// Function to handle the form validation and submission
+function validateSignUpForm() {
+    let isValid = true;
+    
+    // Get form values
+    const email = document.getElementById('signUpEmail').value;
+    const username = document.getElementById('signUpUsername').value;
+    const password = document.getElementById('signUpPassword').value;
+    
+    // Clear previous errors
+    clearValidationError('signUpEmail');
+    clearValidationError('signUpUsername');
+    clearValidationError('signUpPassword');
+    
+    // Validate email
+    if (!email) {
+        showValidationError('signUpEmail', 'Email is required');
+        isValid = false;
+    } else if (!isValidEmail(email)) {
+        showValidationError('signUpEmail', 'Please enter a valid email address');
+        isValid = false;
+    }
+    
+    // Validate username
+    if (!username) {
+        showValidationError('signUpUsername', 'Username is required');
+        isValid = false;
+    } else if (username.length < 3) {
+        showValidationError('signUpUsername', 'Username must be at least 3 characters');
+        isValid = false;
+    }
+    
+    // Validate password
+    if (!password) {
+        showValidationError('signUpPassword', 'Password is required');
+        isValid = false;
+    } else if (!isValidPassword(password)) {
+        showValidationError('signUpPassword', 'Password must be at least 8 characters with letters and numbers');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+    // Real-time validation for email field
+    document.getElementById('signUpEmail').addEventListener('blur', function() {
+        const email = this.value;
+        if (email && !isValidEmail(email)) {
+            showValidationError('signUpEmail', 'Please enter a valid email address');
+        } else if (email) {
+            clearValidationError('signUpEmail');
+        }
+    });
+    
+    // Real-time validation for password field
+    document.getElementById('signUpPassword').addEventListener('input', function() {
+        const password = this.value;
+        if (password && password.length >= 8) {
+            if (!isValidPassword(password)) {
+                showValidationError('signUpPassword', 'Password must include both letters and numbers');
+            } else {
+                clearValidationError('signUpPassword');
+            }
+        }
+    });
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Create a hidden input to store the referring page if it doesn't exist
+    // Store the referring page in a hidden input if it doesn't exist
     if (!document.getElementById('referrerPage')) {
         const referrerInput = document.createElement('input');
         referrerInput.type = 'hidden';
         referrerInput.id = 'referrerPage';
+        referrerInput.name = 'referrer'; // Give it a name so it's included in form submission
         referrerInput.value = document.referrer || "/";
-        document.getElementById('signUpForm').appendChild(referrerInput);
+        document.querySelector('form').appendChild(referrerInput);
     }
-});
 
-
-    // Add event listener for the sign up button
-    document.getElementById('openSignUpModal').addEventListener('click', function() {
+    // Add event listener for the "Create Account" button
+    document.getElementById('createAccountBtn').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        
         // Get form values
         const email = document.getElementById('signUpEmail').value;
         const username = document.getElementById('signUpUsername').value;
@@ -65,10 +154,40 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add event listener for the confirm button in the modal
     document.getElementById('confirmSignUp').addEventListener('click', function() {
-        // Call the original submit function
-        submitSignUp();
-        
-        // Hide the modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmSignUpModal'));
-        modal.hide();
+        // Submit the form to the server
+        document.querySelector('form').submit();
     });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('signUpPassword');
+    const reqLength = document.getElementById('req-length');
+    const reqLetter = document.getElementById('req-letter');
+    const reqNumber = document.getElementById('req-number');
+    
+    // Update password requirement indicators as user types
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        
+        // Check length requirement
+        if (password.length >= 8) {
+            reqLength.querySelector('i').className = 'fas fa-check-circle text-success';
+        } else {
+            reqLength.querySelector('i').className = 'fas fa-times-circle text-danger';
+        }
+        
+        // Check letter requirement
+        if (/[A-Za-z]/.test(password)) {
+            reqLetter.querySelector('i').className = 'fas fa-check-circle text-success';
+        } else {
+            reqLetter.querySelector('i').className = 'fas fa-times-circle text-danger';
+        }
+        
+        // Check number requirement
+        if (/\d/.test(password)) {
+            reqNumber.querySelector('i').className = 'fas fa-check-circle text-success';
+        } else {
+            reqNumber.querySelector('i').className = 'fas fa-times-circle text-danger';
+        }
+    });
+});
