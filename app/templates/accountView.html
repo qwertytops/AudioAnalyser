@@ -22,9 +22,9 @@
                     <div class="profile-icon">
                         <i class="fas fa-user"></i>
                     </div>
-                    <h4 id="username" class="mt-3">Username</h4>
-                    <p id="email" class="text-muted">user@example.com</p>
-                    <p class="small text-muted">Member since: <span id="join-date">January 1, 2025</span></p>
+                    <h4 id="username" class="mt-3">{{ username }}</h4>
+                    <p id="email" class="text-muted">{{ email }}</p>
+                    <p class="small text-muted">Member since: <span id="join-date">{{ joinDate }}</span></p>
                 </div>
                 <div class="account-menu">
                     <button class="account-menu-item active" data-target="profile-section">
@@ -59,15 +59,17 @@
                         <form>
                             <div class="mb-3">
                                 <label for="profileUsername" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="profileUsername" value="Username" disabled>
+                                <input type="text" class="form-control" id="profileUsername" value="{{ username }}"
+                                    disabled>
                             </div>
                             <div class="mb-3">
                                 <label for="profileEmail" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="profileEmail" value="user@example.com" disabled>
+                                <input type="email" class="form-control" id="profileEmail" value="{{ email }}" disabled>
                             </div>
                             <div class="mb-3">
                                 <label for="profilePassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="profilePassword" value="********" disabled>
+                                <input type="password" class="form-control" id="profilePassword" value="********"
+                                    disabled>
                             </div>
                         </form>
                         <div class="card mt-4">
@@ -76,10 +78,12 @@
                             </div>
                             <div class="card-body">
                                 <p>These actions are permanent and cannot be undone.</p>
-                                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteHistoryModal">
+                                <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteHistoryModal">
                                     <i class="fas fa-trash me-1"></i>Delete Analysis History
                                 </button>
-                                <button class="btn btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                                <button class="btn btn-outline-danger ms-2" data-bs-toggle="modal"
+                                    data-bs-target="#deleteAccountModal">
                                     <i class="fas fa-user-times me-1"></i>Delete Account
                                 </button>
                             </div>
@@ -107,29 +111,30 @@
                         </div>
 
                         <div class="analysis-history-list">
+                            {% for analysis in myAnalyses %}
                             <div class="history-item">
                                 <div class="history-item-header d-flex justify-content-between align-items-center">
-                                    <h6>EXAMPLE1.mp3</h6>
-                                    <span class="badge bg-primary">2 days ago</span>
+                                    <h6>{{ analysis.filename }}</h6>
+                                    <span class="badge bg-primary">{{ analysis.createdAt }}</span>
                                 </div>
                                 <div class="history-item-details">
                                     <div class="row g-2">
                                         <div class="col-md-4">
                                             <div class="history-detail">
                                                 <small class="text-muted">Length</small>
-                                                <p>8.5 seconds</p>
+                                                <p>{{ analysis.clipLength }}s</p>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="history-detail">
                                                 <small class="text-muted">Max Level</small>
-                                                <p>-3.2 dBFS</p>
+                                                <p>{{ analysis.maxLevel }} dBFS</p>
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="history-detail">
                                                 <small class="text-muted">Fundamental</small>
-                                                <p>261.6 Hz (C4)</p>
+                                                <p>{{ analysis.fundamentalFrequency }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -146,46 +151,7 @@
                                     </button>
                                 </div>
                             </div>
-
-                            <div class="history-item">
-                                <div class="history-item-header d-flex justify-content-between align-items-center">
-                                    <h6>EXAMPLE2.mp3</h6>
-                                    <span class="badge bg-primary">1 week ago</span>
-                                </div>
-                                <div class="history-item-details">
-                                    <div class="row g-2">
-                                        <div class="col-md-4">
-                                            <div class="history-detail">
-                                                <small class="text-muted">Length</small>
-                                                <p>12.3 seconds</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="history-detail">
-                                                <small class="text-muted">Max Level</small>
-                                                <p>-6.4 dBFS</p>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="history-detail">
-                                                <small class="text-muted">Highest Freq</small>
-                                                <p>8,532 Hz</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="history-item-actions">
-                                    <button class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye me-1"></i>View
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-share me-1"></i>Share
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash me-1"></i>Delete
-                                    </button>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -213,7 +179,8 @@
 </div>
 
 <!-- Delete History Modal -->
-<div class="modal fade" id="deleteHistoryModal" tabindex="-1" aria-labelledby="deleteHistoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteHistoryModal" tabindex="-1" aria-labelledby="deleteHistoryModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -232,7 +199,8 @@
 </div>
 
 <!-- Delete Account Modal -->
-<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -240,7 +208,8 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to permanently delete your account? All your data, including analysis history and shared files, will be permanently deleted.</p>
+                <p>Are you sure you want to permanently delete your account? All your data, including analysis history
+                    and shared files, will be permanently deleted.</p>
                 <div class="mb-3">
                     <label for="confirmPassword" class="form-label">Enter your password to confirm</label>
                     <input type="password" class="form-control" id="confirmPassword" required>

@@ -94,8 +94,13 @@ def share():
     return render_template('shareView.html')
 
 @app.route('/account')
+@login_required
 def account():
-    return render_template('accountView.html')
+    return render_template('accountView.html', 
+                           username=current_user.username,
+                           email=current_user.email,
+                           joinDate=current_user.createdAt,
+                           myAnalyses=AnalysisResult.query.filter_by(userId=current_user.id))
 
 
 # Function to validate email format
