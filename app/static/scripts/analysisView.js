@@ -3,7 +3,6 @@ const analyser = audioCtx.createAnalyser();
 let audioSource = null; // To store the current audio source
 let filesInMemory = []; 
 
-
 window.onload = function () {
     const fileSelect = document.getElementById('fileSelect');
     const analyseButton = document.getElementById('analyseButton');
@@ -148,7 +147,7 @@ function analyseFile(fileBlob, fileName) {
 }
 
 function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLevel) {
-    console.log("Frequency data is:", frequencyData);
+    // console.log("Frequency data is:", frequencyData);
 
     const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
 
@@ -371,24 +370,64 @@ function calculateDBFSFloat(analyser) {
     const timeDomainData = new Uint8Array(bufferLength);
 
     analyser.getByteTimeDomainData(timeDomainData);
-    console.log("tdd:", timeDomainData);
+    // console.log("tdd:", timeDomainData);
 
     // Convert the byte data (0-255) to normalized amplitude (-1 to 1)
     const normalizedData = Array.from(timeDomainData).map(value => (value - 128) / 128);
-    console.log("nd:", normalizedData);
+    // console.log("nd:", normalizedData);
 
     // Calculate RMS (Root Mean Square) amplitude
     const rms = Math.sqrt(
         normalizedData.reduce((sum, value) => sum + value * value, 0) / bufferLength
     );
-    console.log("rms:", rms);
+    // console.log("rms:", rms);
 
     // Calculate dBFS
     const dbfs = 20 * Math.log10(rms);
     return dbfs;
 }
 
+function saveAnalysis() {
+    const analysisData = {
+        filename: document.getElementById('drop-zone-text').textContent.replace('Selected ', ''),
+        clipLength: document.getElementById('clip-length').textContent,
+        maxLevel: document.getElementById('max-db').textContent,
+        highestFrequency: document.getElementById('highest-frequency').textContent,
+        lowestFrequency: document.getElementById('lowest-frequency').textContent,
+        fundamentalFrequency: document.getElementById('fundamental-frequency').textContent,
+    };
 
+    console.log('Saving analysis:', analysisData);
+
+    fetch('/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(analysisData),
+    })
+    .then((response) => {
+        if (response.ok) {
+            // Show the Bootstrap modal
+            const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+            shareModal.show();
+
+            // Add event listener to the "Share" button in the modal
+            document.getElementById('confirmShareButton').addEventListener('click', () => {
+                window.location.href = '/share';
+            });
+        } else if (response.status === 401) {
+            console.log('redirecting to login');
+            window.location.href = '/signUp';
+        } else {
+            alert('Failed to save analysis. Response code: ' + response.status);
+        }
+    })
+    .catch((error) => {
+        console.error('Error saving analysis:', error);
+        alert('An error occurred while saving the analysis.');
+    });
+}
 
 // Add the toggleTheme function from introductoryView.js
 function toggleTheme() {

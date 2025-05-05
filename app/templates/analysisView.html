@@ -132,8 +132,8 @@
                 <h4>Fundamental Frequency</h4>
                 <p><span id="fundamental-frequency">N/A</span> Hz (<span id="fundamental-pitch">N/A</span>)</p>
             </div>
-
-            <a href="share" class="text-decoration-none text-dark">
+            <!-- 
+            <a href="{{ url_for('save') }}" class="text-decoration-none text-dark">
                 <div class="feature-card-share text-center">
                     <div class="feature-icon mx-auto">
                         <i class="fas fa-share"></i>
@@ -141,11 +141,38 @@
                     <h4>Share your results</h4>
                     <p>Click here to share your results with other users!</p>
                 </div>
-            </a>
+            </a> -->
+
+            <button id="saveButton" class="btn btn-primary feature-card-share text-center" onclick="saveAnalysis()">
+                <div class="feature-icon mx-auto">
+                    <i class="fas fa-save"></i>
+                </div>
+                <h4>Save your results</h4>
+                <p>Click here to save your results!</p>
+            </button>
         </div>
     </div>
     <hr>
 </div>
+
+<div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalLabel">Share Analysis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Analysis saved successfully! Would you like to share it?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmShareButton">Share</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='scripts/analysisView.js') }}"></script>
 
 {% endblock %}
