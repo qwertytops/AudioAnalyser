@@ -3,7 +3,70 @@ function showLogInForm() {
 }
 
 function submitLogIn() {
-    // NEED TO IMPLEMENT THIS
+    // Get user input values
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    
+    // Validate input
+    if (!username || !password) {
+        displayLoginMessage('Please enter both username and password', 'error');
+        return;
+    }
+    
+    // Show loading state
+    displayLoginMessage('Authenticating...', 'info');
+    
+    // Make an AJAX request to the server to scan the database
+    fetch('/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Login successful
+            displayLoginMessage('Login successful! Redirecting...', 'success');
+            
+            // Store user data if provided
+            if (data.user) {
+                localStorage.setItem('userData', JSON.stringify(data.user));
+            }
+            
+            // Redirect after successful login (or perform other actions)
+            setTimeout(() => {
+                window.location.href = '/index';
+            }, 1500);
+        } else {
+            // Login failed
+            displayLoginMessage(data.message || 'Invalid username or password', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Login error:', error);
+        displayLoginMessage('An error occurred during login. Please try again.', 'error');
+    });
+}
+
+// Helper function to display login messages
+function displayLoginMessage(message, type) {
+    const messageElement = document.getElementById('loginMessage');
+    if (messageElement) {
+        messageElement.textContent = message;
+        messageElement.className = ''; // Reset classes
+        messageElement.classList.add(`message-${type}`);
+        messageElement.style.display = 'block';
+    }
 }
 
 function toggleTheme() {
