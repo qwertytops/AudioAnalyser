@@ -1,4 +1,3 @@
-
 from flask import render_template, flash, redirect, url_for, session, request, jsonify
 from flask_login import current_user, login_required
 from sqlalchemy import func
@@ -7,7 +6,7 @@ from app.models import User, AnalysisResult
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import re
-
+import os
 
 
 uploadFolder = 'app/static/uploads/'
@@ -70,12 +69,12 @@ def save():
     data = request.get_json()
 
     analysis = AnalysisResult(
-        id=db.session.query(func.max(AnalysisResult.id)).scalar(), # update database so this autoincrements
         title="default_title",
         description="default_description",
         createdAt=datetime.datetime.now(),
         userId=current_user.id,
         fileName=data.get('filename'),
+        frequencyArray=data.get('frequencyArray'),
         clipLength=data.get('clipLength'),
         maxLevel=data.get('maxLevel'),
         highestFrequency=data.get('highestFrequency'),

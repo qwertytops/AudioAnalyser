@@ -1,7 +1,8 @@
 const audioCtx = new AudioContext();
 const analyser = audioCtx.createAnalyser();
 let audioSource = null; // To store the current audio source
-let filesInMemory = []; 
+let filesInMemory = [];
+let currentAudioBuffer = null;
 
 window.onload = function () {
     const fileSelect = document.getElementById('fileSelect');
@@ -71,6 +72,7 @@ function analyseFile(fileBlob, fileName) {
 
         // Decode the audio data
         audioCtx.decodeAudioData(arrayBuffer, async (audioBuffer) => {
+            currentAudioBuffer = audioBuffer;
             visualiseFullWaveform(audioBuffer); // works with regular audio context
 
             const offlineCtx = new OfflineAudioContext(
@@ -390,6 +392,7 @@ function calculateDBFSFloat(analyser) {
 function saveAnalysis() {
     const analysisData = {
         filename: document.getElementById('drop-zone-text').textContent.replace('Selected ', ''),
+        frequencyArray: Array.from(currentAudioBuffer.getChannelData(0)),
         clipLength: document.getElementById('clip-length').textContent,
         maxLevel: document.getElementById('max-db').textContent,
         highestFrequency: document.getElementById('highest-frequency').textContent,
