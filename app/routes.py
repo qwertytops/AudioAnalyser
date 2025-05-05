@@ -1,3 +1,4 @@
+
 from flask import render_template, flash, redirect, url_for, session, request, jsonify
 from flask_login import current_user, login_required
 from sqlalchemy import func
@@ -8,18 +9,57 @@ from datetime import datetime
 import re
 
 
+
+uploadFolder = 'app/static/uploads/'
+app.config['UPLOAD_FOLDER'] = uploadFolder
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template('introductoryView.html')
 
-@app.route('/upload')
+@app.route('/upload' , methods=['GET', 'POST'])
 def upload():
+    if request.method == 'POST':
+        if 'files' not in request.files:
+            flash('No file part')
+        
+        uploadedFiles = request.files.getlist('files')
+        savedFiles = []
+        for file in uploadedFiles:
+            if file.filename == '':
+                continue
+            if file:
+                filePath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                file.save(filePath)
+                savedFiles.append(file.filename)
+        return redirect(url_for('analysis', files=",".join(savedFiles)))
+                
     return render_template('uploadView.html')
 
-@app.route('/analysis')
+@app.route('/analysis', methods=['GET'])
 def analysis():
+    sentFiles = request.args.get('files')
+    if sentFiles:
+        files = sentFiles.split(',')
+        return render_template('analysisView.html', files=files)
+    else:
+        flash('No files uploaded')
+
     return render_template('analysisView.html')
+
+
+@app.route('/cleanupFiles', methods=['POST'])
+def cleanupFiles():
+    try:
+        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+            filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.isfile(filePath):
+                os.unlink(filePath)
+        return jsonify({"status": "success"}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "error"}), 500
+        
 
 @app.route('/save', methods=['GET', 'POST'])
 def save():
@@ -47,7 +87,6 @@ def save():
     db.session.commit()
     print("saved!")
     return jsonify({'message': 'Analysis saved successfully!'}), 200
-
 
 
 @app.route('/share')

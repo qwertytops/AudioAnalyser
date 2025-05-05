@@ -15,11 +15,22 @@
         This page is still in development!
     </div>
 
-    <h3 class="mb-4 text-center">Upload your file</h3>
+    <div class="text-center"  style="display: none;">
+        <button id="uploadButton" href = "/upload" class="btn btn-primary btn-lg" >
+            Upload
+        </button>
+    </div>
 
-    <div class="drop-zone mb-4" id="drop-zone">
-        <p><span id="drop-zone-text">Drag & drop files here or click to browse</span></p>
-        <input type="file" id="fileInput" class="hidden-file-input" accept="audio/*">
+    
+    <div id = "selector" class="form-group text-center">
+        <h2 class="text-center">Uploaded Files</h2>
+        <label for="fileSelect" class="form-label">Select a file:</label>
+        <select id="fileSelect" class="form-control w-50 mx-auto">
+            <option value="" disabled selected>Select a file</option>
+            {% for file in files %}
+                <option value="{{ file }}">{{ file }}</option>
+            {% endfor %}
+        </select>
     </div>
 
     <div class="m-4">
