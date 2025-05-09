@@ -15,7 +15,8 @@ app.config['UPLOAD_FOLDER'] = uploadFolder
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('introductoryView.html')
+    form = LoginForm()
+    return render_template('introductoryView.html', form=form)
 
 @app.route('/upload' , methods=['GET', 'POST'])
 def upload():

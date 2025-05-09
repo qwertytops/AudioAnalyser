@@ -74,6 +74,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         fetch('/upload', {
             method: 'POST',
+            headers: addCsrfHeader(),
             body: formData
         })
         .then(response => {

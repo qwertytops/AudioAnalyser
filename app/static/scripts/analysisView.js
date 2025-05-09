@@ -411,9 +411,9 @@ function saveAnalysis() {
 
     fetch('/save', {
         method: 'POST',
-        headers: {
+        headers: addCsrfHeader({  // Use the utility function to add CSRF token
             'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify(analysisData),
     })
     .then((response) => {
@@ -455,14 +455,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Add this to your JavaScript file or in a <script> tag at the end of your HTML file
+
 document.addEventListener('DOMContentLoaded', function() {
     // Hide oscilloscope and results sections initially
-    const oscilloscope = document.querySelector('#oscilloscope'); // Update with your actual ID
+    const oscilloscope = document.querySelector('#oscilloscope'); 
     const resultsSection = document.querySelector('#data-area');
-    const playButton = document.querySelector('#playButton'); // Update with your actual button ID
-    const pauseButton = document.querySelector('#pauseButton'); // Update with your actual button ID
-    const stopButton = document.querySelector('#stopButton'); // Update with your actual button ID
+    const playButton = document.querySelector('#playButton');
+    const pauseButton = document.querySelector('#pauseButton'); 
+    const stopButton = document.querySelector('#stopButton'); 
     
     if (oscilloscope) oscilloscope.style.display = 'none';
     if (resultsSection) resultsSection.style.display = 'none';
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (stopButton) stopButton.style.display = 'none';
     
     // Add event listener to the Analysis button
-    const analyseButton = document.querySelector('#analyseButton'); // Update with your actual button ID
+    const analyseButton = document.querySelector('#analyseButton');
     
     if (analyseButton) {
         analyseButton.addEventListener('click', function() {
@@ -491,9 +491,9 @@ window.addEventListener('beforeunload', function() {
     const uploadButton = document.getElementById('uploadButton');
     this.fetch('/cleanupFiles', {
         method: 'POST',
-        headers: {
+        headers: addCsrfHeader({
             'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify({ action: 'delete_files' }), 
     }).then(response => {
         if (!response.ok) {
