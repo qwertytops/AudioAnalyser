@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, session, request, j
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 from app import app, db
-from app.models import User, AnalysisResult
+from app.models import User, AnalysisResult, SharedResults
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import re
@@ -91,8 +91,23 @@ def save():
 
 @app.route('/share')
 @login_required
-def share():
-    return render_template('shareView.html')
+def share(analysisId):
+    if request.method == "POST":
+        # share logic
+        data = request.get_json()
+        sharedResults = SharedResults(
+            analysisId=analysisId,
+            fromUser=data.get('from'),
+            toUser=data.get('to'),
+            date=datetime.datetime.now()
+        )
+
+        return redirect(url_for('share'), analysisId=analysisId) # reload page so user can share again maybe
+    
+    myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id)
+    return render_template('shareView.html', 
+                           myAnalyses,
+                           analysisId)
 
 @app.route('/account')
 @login_required
