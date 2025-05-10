@@ -32,5 +32,5 @@ class SharedResults(db.Model):
     analysisId = db.Column(db.Integer, db.ForeignKey('analysis_result.id'), nullable=False)
     fromUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     toUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    message = db.Column(db.String(256), nullable=True)
+    message = db.Column(db.String(256), nullable=False, server_default='')
     date = db.Column(db.DateTime, nullable=False)
