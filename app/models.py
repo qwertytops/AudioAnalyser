@@ -15,8 +15,6 @@ def load_user(user_id):
 
 class AnalysisResult(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False, index=True, autoincrement=True)
-    title = db.Column(db.String(64), nullable=True)
-    description = db.Column(db.String(512), nullable=True)
     createdAt = db.Column(db.DateTime, default=db.func.current_timestamp(), nullable=False)
 
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -34,4 +32,5 @@ class SharedResults(db.Model):
     analysisId = db.Column(db.Integer, db.ForeignKey('analysis_result.id'), nullable=False)
     fromUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     toUser = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String(256), nullable=True)
     date = db.Column(db.DateTime, nullable=False)
