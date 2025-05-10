@@ -4,97 +4,55 @@
 {% endblock %}
 {% block content %}
 <div class="main-content">
-
-    <div class="sidebar-Container">
-        <div class = "sidebar">
-            <div class="sidebar-Title">
-                Options
+    <div class="content">
+        <div class="section active" id="share">
+            <h1>Share</h1>
+            <div class="form-container">
+                <p>Add a message</p>
+                <textarea placeholder="send a message (optional)"></textarea>
+                <p>Select Analysis</p>
+                <select id="analysisSelect" class="analysis-select">
+                    {% for analysis in myAnalyses %}
+                    <option value="{{ analysis[0] }}">{{ analysis[1] }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <ul class="sidebar-List">
-                <li class = "sidebar-Option active" onclick="switchContent('share', this)"> <svg id = "shareIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill" viewBox="0 0 16 16">
-                    <path  d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
-                  </svg> Share</li>
-                <li class = "sidebar-Option" onclick="switchContent('notification', this)"><svg id = "bell" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
-                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
-                  </svg>Notifications</li>
-                
-            </ul>
-        </div> 
-
-        <div class="content">
-            <div class = "section active" id = "share">
-                <h1>Share</h1>
-                <div class = "form-container">
-                    <p>Add a message</p>
-                    <textarea placeholder="send a message (optional)"></textarea>
-                    <p>Select Analysis</p>
-                    <select class="analysis-select"> 
-                        <option value="1">analysis 1</option>
-                        <option value="2">analysis 2</option>
-                        <option value="3">analysis 3</option>
-                    </select>
-                </div>
-                <p class = "sum">Analysis Summary</p>
-                <div class="mt-5 text-center">
-                    <canvas id="oscilloscope" width="500" height="200"></canvas>
-                </div>
-                <div class="analysis">
-                    
-                    <div class="data">
-                      <div class="data-label">Clip Length</div>
-                      <div class="data-value">-</div>
-                    </div>
-                    <div class="data">
-                      <div class="data-label">Max level (dBFS)</div>
-                      <div class="data-value">-</div>
-                    </div>
-                    <div class="data">
-                      <div class="data-label">Highest Frequency</div>
-                      <div class="data-value">-</div>
-                    </div>
-                    <div class="data">
-                      <div class="data-label">Lowest Frequency</div>
-                      <div class="data-value">-</div>
-                    </div>
-                    <div class="data">
-                        <div class="data-label">Fundamental Frequency</div>
-                        <div class="data-value">-</div>
-                      </div>
-                </div>
-                <div class = "friend">
-                    <label for="friendSelect" class="friend-label">Share with:</label>
-                    <select id="friendSelect" class="friend-select"> 
-                        <option disabled selected>Select a friend</option>
-                        <option value="1">friend 1</option>
-                        <option value="2">friend 2</option>
-                        <option value="3">friend 3</option>
-                    </select>
-                </div>
-                
-
-                <div class="shareButton">
-                    <button type="button" class="btn btn-primary" id = "shareButton">Share</button>
-                </div>
-
+            <p class="sum">Analysis Summary</p>
+            <div class="mt-5 text-center">
+                <canvas id="oscilloscope" width="500" height="200"></canvas>
             </div>
-
-
-            <div class = "section" id = "notification" >
-                <h1>notifications</h1>
-                <div class = "notBell">
-                    <i id = "bell2" class="fas fa-bell-slash" style="font-size: 48px; color: #dadce0; margin-bottom: 20px;"></i>
-                    <p>No new notifications</p>
-                    
+            <div class="analysis">
+                <div class="data">
+                    <div class="data-label">Clip Length</div>
+                    <div id="clipLengthField" class="data-value">-</div>
                 </div>
-                
+                <div class="data">
+                    <div class="data-label">Max level (dBFS)</div>
+                    <div id="maxLevelField" class="data-value">-</div>
+                </div>
+                <div class="data">
+                    <div class="data-label">Highest Frequency</div>
+                    <div id="highestFrequencyField" class="data-value">-</div>
+                </div>
+                <div class="data">
+                    <div class="data-label">Lowest Frequency</div>
+                    <div id="lowestFrequencyField" class="data-value">-</div>
+                </div>
+                <div class="data">
+                    <div class="data-label">Fundamental Frequency</div>
+                    <div id="fundamentalFrequencyField" class="data-value">-</div>
+                </div>
+            </div>
+            <div class="friend position-relative">
+                <label for="recipientInput" class="friend-label fw-bold mb-2">Share with:</label>
+                <input type="text" id="recipientInput" class="form-control" placeholder="Enter a username or email">
+                <ul id="usernameSuggestions" class="suggestions-list list-group position-absolute h-150 w-20"></ul>
+            </div>
+            <div class="shareButton mt-4">
+                <button type="button" class="btn btn-primary" id="shareButton" onclick="shareAnalysis()">Share</button>
             </div>
         </div>
-        
-           
-
-
     </div>
 </div>
-
 <script src="{{ url_for('static', filename='scripts/shareView.js') }}"></script>
 {% endblock %}
