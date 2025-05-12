@@ -30,12 +30,12 @@
             <div class="d-flex align-items-center" id="right">
                 {% if current_user.is_authenticated %}
                 <span class="me-3">Welcome, {{ current_user.username }}</span>
-                <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">
+                <a href="{{ url_for('main.logout') }}" class="btn btn-outline-danger btn-sm">
                     <i class="fas fa-sign-out-alt me-1"></i>Logout
                 </a>
                 {% else %}
                 <a href="/?showLogin=true" class="text-decoration-none" id="loginLink" onclick="showLogInForm()">Log In</a>
-                <a href="{{ url_for('signUp') }}" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
+                <a href="{{ url_for('main.signUp') }}" class="btn btn-outline-primary" id="signUpLink">Sign Up</a>
                 {% endif %}
             </div>
 
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentPage !== '/signUp') {
         const signUpLink = document.getElementById('signUpLink');
         if (signUpLink) {
-            signUpLink.href = "{{ url_for('signUp') }}?redirect=" + encodeURIComponent(currentPage);
+            signUpLink.href = "{{ url_for('main.signUp') }}?redirect=" + encodeURIComponent(currentPage);
         }
     }
 });

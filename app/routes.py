@@ -1,7 +1,7 @@
-from flask import render_template, flash, redirect, url_for, session, request, jsonify
+from flask import render_template, flash, redirect, url_for, session, request, jsonify, Blueprint, current_app
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
-from app import app, db
+from app import db
 from app.models import User, AnalysisResult
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.forms import LoginForm, SignUpForm
@@ -9,16 +9,17 @@ import datetime
 import re
 import os
 
+main = Blueprint('main', __name__)
 
-uploadFolder = 'app/static/uploads/'
-app.config['UPLOAD_FOLDER'] = uploadFolder
-@app.route('/')
-@app.route('/index')
+
+
+@main.route('/')
+@main.route('/index')
 def index():
     form = LoginForm()
     return render_template('introductoryView.html', form=form)
 
-@app.route('/upload' , methods=['GET', 'POST'])
+@main.route('/upload' , methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         if 'files' not in request.files:
@@ -30,14 +31,14 @@ def upload():
             if file.filename == '':
                 continue
             if file:
-                filePath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                filePath = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filePath)
                 savedFiles.append(file.filename)
-        return redirect(url_for('analysis', files=",".join(savedFiles)))
+        return redirect(url_for('main.analysis', files=",".join(savedFiles)))
                 
     return render_template('uploadView.html')
 
-@app.route('/analysis', methods=['GET'])
+@main.route('/analysis', methods=['GET'])
 def analysis():
     sentFiles = request.args.get('files')
     if sentFiles:
@@ -49,11 +50,11 @@ def analysis():
     return render_template('analysisView.html')
 
 
-@app.route('/cleanupFiles', methods=['POST'])
+@main.route('/cleanupFiles', methods=['POST'])
 def cleanupFiles():
     try:
-        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-            filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        for filename in os.listdir(current_app.config['UPLOAD_FOLDER']):
+            filePath = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
             if os.path.isfile(filePath):
                 os.unlink(filePath)
         return jsonify({"status": "success"}), 200
@@ -61,7 +62,7 @@ def cleanupFiles():
         print(e)
         return jsonify({"status": "error"}), 500
         
-@app.route('/save', methods=['GET', 'POST'])
+@main.route('/save', methods=['GET', 'POST'])
 def save():
 
     if not current_user.is_authenticated:
@@ -89,12 +90,12 @@ def save():
     return jsonify({'message': 'Analysis saved successfully!'}), 200
 
 
-@app.route('/share')
+@main.route('/share')
 @login_required
 def share():
     return render_template('shareView.html')
 
-@app.route('/account')
+@main.route('/account')
 @login_required
 def account():
     return render_template('accountView.html', 
@@ -118,7 +119,7 @@ def is_valid_password(password):
 
 
 
-@app.route('/signUp', methods=['GET', 'POST'])
+@main.route('/signUp', methods=['GET', 'POST'])
 def signUp():
     form = SignUpForm()
     if form.validate_on_submit():
@@ -144,7 +145,7 @@ def signUp():
     
     return render_template('signUp.html', form=form)
 
-@app.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -174,7 +175,7 @@ def login():
             # Redirect to the requested page or default to index
             next_page = request.args.get('next')
             if not next_page or not next_page.startswith('/'):
-                next_page = url_for('index')
+                next_page = url_for('main.index')
                 
             return redirect(next_page)
         else:
@@ -183,7 +184,7 @@ def login():
     # If GET request or login failed, show the login form
     return render_template('introductoryView.html', form=form)
 
-@app.route('/logout')
+@main.route('/logout')
 def logout():
     # Clear user session
     session.pop('user_id', None)
@@ -193,4 +194,4 @@ def logout():
     logout_user()
     
     # Redirect to home page
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
