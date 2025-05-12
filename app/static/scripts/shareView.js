@@ -154,9 +154,11 @@ function visualiseFullWaveform(rawData) {
 function shareAnalysis() {
     const analysisSelect = document.getElementById('analysisSelect');
     const recipientInput = document.getElementById('recipientInput');
+    const messageInput = document.getElementById('messageInput');
 
     const selectedAnalysisId = analysisSelect.value;
     const recipientUsername = recipientInput.value.trim();
+    const message = messageInput.value.trim();
 
     if (!selectedAnalysisId) {
         alert('Please select an analysis to share.');
@@ -168,13 +170,17 @@ function shareAnalysis() {
         return;
     }
 
-    // Prepare the data to send
+    if (!message) {
+        alert('Please enter a message.');
+        return;
+    }
+
     const requestData = {
         analysisId: selectedAnalysisId,
-        to: recipientUsername
+        to: recipientUsername,
+        message: message
     };
 
-    // Send the POST request
     fetch('/share', {
         method: 'POST',
         headers: {
@@ -193,4 +199,8 @@ function shareAnalysis() {
                 alert('Analysis shared successfully!');
             }
         })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while sharing the analysis.');
+        });
 }

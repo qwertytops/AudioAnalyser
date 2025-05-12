@@ -70,8 +70,6 @@ def save():
     data = request.get_json()
 
     analysis = AnalysisResult(
-        title="default_title",
-        description="default_description",
         createdAt=datetime.datetime.now(),
         userId=current_user.id,
         fileName=data.get('filename'),
@@ -115,6 +113,7 @@ def share(analysisId=0):
             analysisId=analysisId,
             fromUser=current_user.id,
             toUser=recipient.id,
+            message = data.get('message') or "No message",
             date=datetime.datetime.now()
         )
         db.session.add(sharedResults)
