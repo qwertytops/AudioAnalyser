@@ -91,10 +91,12 @@ def save():
 @login_required
 def share(analysisId=0):
     if request.method == "POST":
-        # share logic
         data = request.get_json()
-        analysisId = data.get('analysisId')
-        toUsername = data.get('to')
+        try:
+            analysisId = int(data.get('analysisId'))
+            toUsername = data.get('to')
+        except (ValueError, TypeError) as e:
+            return jsonify({'error': 'Invalid analysis ID format'}), 400
 
         if not analysisId or not toUsername:
             return jsonify({'error': 'Missing analysisId or recipient username'}), 400
@@ -294,11 +296,8 @@ def get_analysis(analysis_id):
 def get_users():
     query = request.args.get('q', '').strip()
     if not query:
-        print('no args. returning all users')
         users = User.query.all()
         return jsonify([user.username for user in users])
 
-    # Query the database for usernames that match the query
-    print('returning matching users')
     users = User.query.filter(User.username.ilike(f'%{query}%')).all()
     return jsonify([user.username for user in users])

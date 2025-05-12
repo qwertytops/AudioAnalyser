@@ -154,7 +154,7 @@ function visualiseFullWaveform(rawData) {
 function shareAnalysis() {
     const analysisSelect = document.getElementById('analysisSelect');
     const recipientInput = document.getElementById('recipientInput');
-    const messageInput = document.getElementById('messageInput');
+    const messageInput = document.getElementById('message');
 
     const selectedAnalysisId = analysisSelect.value;
     const recipientUsername = recipientInput.value.trim();
@@ -170,37 +170,33 @@ function shareAnalysis() {
         return;
     }
 
-    if (!message) {
-        alert('Please enter a message.');
-        return;
-    }
-
     const requestData = {
         analysisId: selectedAnalysisId,
         to: recipientUsername,
-        message: message
+        message: message || ""
     };
 
     fetch('/share', {
         method: 'POST',
-        headers: {
+        headers: addCsrfHeader({
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
+        }),
+        body: JSON.stringify(requestData)
     })
-        .then(response => {
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                console.error('Error sharing analysis:', data.error);
-                alert(data.error);
-            } else {
-                alert('Analysis shared successfully!');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while sharing the analysis.');
-        });
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || `HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Success response:", data);
+        alert('Analysis shared successfully!');
+    })
+    .catch(error => {
+        console.error("Error details:", error);
+        alert(`Failed to share analysis: ${error.message}`);
+    });
 }
