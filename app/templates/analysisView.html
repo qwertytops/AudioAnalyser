@@ -132,6 +132,16 @@
                 <h4>Fundamental Frequency</h4>
                 <p><span id="fundamental-frequency">N/A</span> Hz (<span id="fundamental-pitch">N/A</span>)</p>
             </div>
+            <!-- 
+            <a href="{{ url_for('save') }}" class="text-decoration-none text-dark">
+                <div class="feature-card-share text-center">
+                    <div class="feature-icon mx-auto">
+                        <i class="fas fa-share"></i>
+                    </div>
+                    <h4>Share your results</h4>
+                    <p>Click here to share your results with other users!</p>
+                </div>
+            </a> -->
 
             <button id="saveButton" class="btn btn-primary feature-card-share text-center" onclick="saveAnalysis()">
                 <div class="feature-icon mx-auto">
@@ -164,19 +174,5 @@
 </div>
 
 <script src="{{ url_for('static', filename='scripts/analysisView.js') }}"></script>
-<script>
-function saveAnalysis() {
-    
-    // Disables all interactive buttons
-    document.getElementById('saveButton').disabled = true;
-    document.getElementById('playButton').disabled = true;
-    document.getElementById('pauseButton').disabled = true;
-    document.getElementById('stopButton').disabled = true;
-    document.getElementById('fileSelect').disabled = true;
-    document.getElementById('fftSize').disabled = true;
-    document.getElementById('noiseFloor').disabled = true;
-    document.getElementById('analyseButton').disabled = true;
-}
-</script>
 
 {% endblock %}
