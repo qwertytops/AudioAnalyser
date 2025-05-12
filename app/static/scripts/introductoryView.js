@@ -39,9 +39,9 @@ function submitLogIn() {
     // Make an AJAX request to the server to scan the database
     fetch('/login', {
         method: 'POST',
-        headers: {
+        headers: addCsrfHeader({
             'Content-Type': 'application/json',
-        },
+        }),
         body: JSON.stringify({
             username: loginId, // Backend expects 'username' key but this can be email too
             password: password

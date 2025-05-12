@@ -4,6 +4,7 @@ from sqlalchemy import func
 from app import app, db
 from app.models import User, AnalysisResult, SharedResults
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.forms import LoginForm, SignUpForm
 import datetime
 import re
 import os
@@ -14,7 +15,8 @@ app.config['UPLOAD_FOLDER'] = uploadFolder
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('introductoryView.html')
+    form = LoginForm()
+    return render_template('introductoryView.html', form=form)
 
 @app.route('/upload' , methods=['GET', 'POST'])
 def upload():
@@ -59,7 +61,6 @@ def cleanupFiles():
         print(e)
         return jsonify({"status": "error"}), 500
         
-
 @app.route('/save', methods=['GET', 'POST'])
 def save():
 
@@ -161,75 +162,36 @@ def is_valid_password(password):
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        # Server-side validation
-        errors = []
-        
-        # Validate username
-        if not username or len(username) < 3:
-            errors.append('Username must be at least 3 characters long.')
-        
-        # Validate email
-        if not email or not is_valid_email(email):
-            errors.append('Please enter a valid email address.')
-        
-        # Validate password
-        if not password or not is_valid_password(password):
-            errors.append('Password must be at least 8 characters long and contain both letters and numbers.')
-        
-        # Check for existing username/email
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            errors.append(f'Username "{username}" is already taken. Please choose another.')
-            
-        existing_email = User.query.filter_by(email=email).first()
-        if existing_email:
-            errors.append(f'Email "{email}" is already registered. Please use another email or try to log in.')
-        
-        # If there are any validation errors, flash them and return to the form
-        if errors:
-            for error in errors:
-                flash(error, 'danger')
-            return render_template('signUp.html')
-        
-        # If validation passes, create the new user
-        passwordHash = generate_password_hash(password)
+    form = SignUpForm()
+    if form.validate_on_submit():
+        passwordHash = generate_password_hash(form.password.data)
         createdAt = datetime.datetime.now()
         updatedAt = datetime.datetime.now()
 
-        new_user = User(username=username, email=email, passwordHash=passwordHash, createdAt=createdAt, updatedAt=updatedAt)
+        new_user = User(
+            username=form.username.data, 
+            email=form.email.data, 
+            passwordHash=passwordHash, 
+            createdAt=createdAt, 
+            updatedAt=updatedAt
+        )
         db.session.add(new_user)
         db.session.commit()
 
         # Get redirect URL from form or default to index
-        redirect_url = request.form.get('referrer', '/')
+        redirect_url = request.args.get('redirect', '/')
 
         flash('Account created successfully!', 'success')
         return redirect(redirect_url)
     
-    return render_template('signUp.html')
+    return render_template('signUp.html', form=form)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        login_id = request.form.get('loginId')
-        password = request.form.get('password')
-        
-        # Validate input
-        errors = []
-        if not login_id:
-            errors.append('Please enter your username or email.')
-        if not password:
-            errors.append('Please enter your password.')
-            
-        if errors:
-            for error in errors:
-                flash(error, 'danger')
-            return render_template('introductoryView.html')
+    form = LoginForm()
+    if form.validate_on_submit():
+        login_id = form.login_id.data
+        password = form.password.data
         
         # Check if login_id is an email or username
         if '@' in login_id:
@@ -261,7 +223,7 @@ def login():
             flash('Invalid username/email or password. Please try again.', 'danger')
             
     # If GET request or login failed, show the login form
-    return render_template('introductoryView.html')
+    return render_template('introductoryView.html', form=form)
 
 @app.route('/logout')
 def logout():

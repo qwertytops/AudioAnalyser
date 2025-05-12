@@ -25,39 +25,61 @@
     {% endwith %}
     
     <form action="{{ url_for('signUp') }}" method="POST" id="signUpForm" class="auth-form" novalidate>
+        {{ form.hidden_tag() }}
         <h3 class="text-center mb-4">Join Audiometry</h3>
         
         <!-- Hidden input for the referrer -->
         <input type="hidden" id="referrerPage" name="referrer" value="{{ request.args.get('redirect', '/') }}">
         
         <div class="form-group">
-            <label for="signUpEmail" class="form-label">Email Address</label>
+            {{ form.email.label(class="form-label") }}
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                <input type="email" name="email" id="signUpEmail" class="form-control" placeholder="Enter your email" required>
+                {{ form.email(class="form-control", id="signUpEmail", placeholder="Enter your email") }}
             </div>
+            {% if form.email.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.email.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="invalid-feedback">
                 Please enter a valid email address.
             </div>
         </div>
         
         <div class="form-group">
-            <label for="signUpUsername" class="form-label">Username</label>
+            {{ form.username.label(class="form-label") }}
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-user"></i></span>
-                <input type="text" name="username" id="signUpUsername" class="form-control" placeholder="Create a username" required minlength="3">
+                {{ form.username(class="form-control", id="signUpUsername", placeholder="Create a username") }}
             </div>
+            {% if form.username.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.username.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="invalid-feedback">
                 Please choose a username (minimum 3 characters).
             </div>
         </div>
         
         <div class="form-group">
-            <label for="signUpPassword" class="form-label">Password</label>
+            {{ form.password.label(class="form-label") }}
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                <input type="password" name="password" id="signUpPassword" class="form-control" placeholder="Create a password" required minlength="8">
+                {{ form.password(class="form-control", id="signUpPassword", placeholder="Create a password") }}
             </div>
+            {% if form.password.errors %}
+                <div class="invalid-feedback d-block">
+                    {% for error in form.password.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
             <div class="invalid-feedback">
                 Password must be at least 8 characters with letters and numbers.
             </div>
