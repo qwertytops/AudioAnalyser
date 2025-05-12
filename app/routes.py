@@ -138,11 +138,45 @@ def share(analysisId=0):
 @app.route('/account')
 @login_required
 def account():
+    myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
+    
+    # Get shared analyses with related data
+    shared_analyses_data = (
+        db.session.query(
+            SharedResults,
+            AnalysisResult,
+            User
+        )
+        .join(
+            AnalysisResult,
+            SharedResults.analysisId == AnalysisResult.id
+        )
+        .join(
+            User,
+            SharedResults.fromUser == User.id
+        )
+        .filter(SharedResults.toUser == current_user.id)
+        .all()
+    )
+
+    # Format the data for the template
+    formattedShared = [{
+        'id': shared.id,
+        'fileName': analysis.fileName,
+        'fromUser': from_user.username,
+        'date': shared.date.strftime('%Y-%m-%d %H:%M'),
+        'message': shared.message,
+        'clipLength': analysis.clipLength,
+        'maxLevel': analysis.maxLevel,
+        'fundamentalFrequency': analysis.fundamentalFrequency
+    } for shared, analysis, from_user in shared_analyses_data]
+
     return render_template('accountView.html', 
-                           username=current_user.username,
-                           email=current_user.email,
-                           joinDate=current_user.createdAt,
-                           myAnalyses=AnalysisResult.query.filter_by(userId=current_user.id))
+                         username=current_user.username,
+                         email=current_user.email,
+                         joinDate=current_user.createdAt,
+                         myAnalyses=myAnalyses,
+                         sharedAnalyses=formattedShared)
 
 
 # Function to validate email format

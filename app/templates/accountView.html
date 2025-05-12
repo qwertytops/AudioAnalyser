@@ -115,7 +115,8 @@
                             <div class="history-item">
                                 <div class="history-item-header d-flex justify-content-between align-items-center">
                                     <h6>{{ analysis.fileName }}</h6>
-                                    <span class="badge bg-primary">{{ analysis.createdAt }}</span>
+                                    <span class="badge bg-primary">{{ analysis.createdAt.strftime('%Y-%m-%d %H:%M')
+                                        }}</span>
                                 </div>
                                 <div class="history-item-details">
                                     <div class="row g-2">
@@ -164,12 +165,67 @@
                         <h5 class="mb-0">Shared With Me</h5>
                     </div>
                     <div class="card-body">
-                        <div class="shared-empty text-center">
+                        <div class="shared-empty text-center d-none">
                             <div class="empty-icon">
                                 <i class="fas fa-share-alt"></i>
                             </div>
                             <h5 class="mt-3">No Shared Analysis</h5>
                             <p class="text-muted">No one has shared any analysis with you yet.</p>
+                        </div>
+
+                        <div class="shared-analysis-list">
+                            {% for shared in sharedAnalyses %}
+                            <div class="history-item">
+                                <div class="history-item-header d-flex justify-content-between align-items-center">
+                                    <h6>{{ shared.fileName }}</h6>
+                                    <span class="badge bg-primary">{{ shared.date }}</span>
+                                </div>
+                                <div class="history-item-details">
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <div class="history-detail">
+                                                <small class="text-muted">Length</small>
+                                                <p>{{ shared.clipLength|round(2) }}s</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="history-detail">
+                                                <small class="text-muted">Max Level</small>
+                                                <p>{{ shared.maxLevel|round(2) }} dBFS</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="history-detail">
+                                                <small class="text-muted">Fundamental</small>
+                                                <p>{{ shared.fundamentalFrequency|round(2) }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mt-3">
+                                        <div class="col-md-6">
+                                            <div class="history-detail">
+                                                <small class="text-muted">From</small>
+                                                <p>{{ shared.fromUser }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="history-detail">
+                                                <small class="text-muted">Message</small>
+                                                <p>{{ shared.message }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="history-item-actions">
+                                    <button class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash me-1"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
