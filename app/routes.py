@@ -2,9 +2,10 @@ from flask import render_template, flash, redirect, url_for, session, request, j
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 from app import app, db
-from app.models import User, AnalysisResult
+from app.models import User, AnalysisResult, SharedResults
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.forms import LoginForm, SignUpForm
+from app.passwordHashing import verify_password
 import datetime
 import re
 import os
@@ -100,6 +101,64 @@ def account():
                            email=current_user.email,
                            joinDate=current_user.createdAt,
                            myAnalyses=AnalysisResult.query.filter_by(userId=current_user.id))
+
+# New route to delete user's analysis history
+@app.route('/deleteHistory', methods=['POST'])
+@login_required
+def deleteHistory():
+    try:
+        # Delete all analysis results for the current user
+        AnalysisResult.query.filter_by(userId=current_user.id).delete()
+        
+        # Delete any shared results where this user is the sender
+        SharedResults.query.filter_by(fromUser=current_user.id).delete()
+        
+        # Commit the changes to the database
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Analysis history deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error deleting history: {str(e)}'}), 500
+
+# New route to delete user's account
+@app.route('/deleteAccount', methods=['POST'])
+@login_required
+def deleteAccount():
+    try:
+        data = request.get_json()
+        password = data.get('password')
+        
+        # Verify password
+        if not verify_password(password, current_user.passwordHash):
+            return jsonify({'success': False, 'message': 'Incorrect password'}), 400
+        
+        # Delete user's analysis results
+        AnalysisResult.query.filter_by(userId=current_user.id).delete()
+        
+        # Delete shared results where user is sender or receiver
+        SharedResults.query.filter((SharedResults.fromUser == current_user.id) | 
+                                  (SharedResults.toUser == current_user.id)).delete()
+        
+        # Store user ID before deletion
+        user_id = current_user.id
+        
+        # Log the user out
+        logout_user()
+        
+        # Delete the user
+        User.query.filter_by(id=user_id).delete()
+        
+        # Commit the changes to the database
+        db.session.commit()
+        
+        # Clear session data
+        session.clear()
+        
+        return jsonify({'success': True, 'message': 'Account deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error deleting account: {str(e)}'}), 500
 
 
 # Function to validate email format
