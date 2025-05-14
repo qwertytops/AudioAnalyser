@@ -396,88 +396,7 @@ function calculateDBFSFloat(analyser) {
     return dbfs;
 }
 
-// Function to disable all interactive buttons
-function disableAllButtons() {
-    // Disable all buttons
-    const buttons = document.querySelectorAll('button');
-    buttons.forEach(button => {
-        button.disabled = true;
-    });
-    
-    // Disable file select dropdown
-    const fileSelect = document.getElementById('fileSelect');
-    if (fileSelect) {
-        fileSelect.disabled = true;
-    }
-    
-    // Disable form inputs
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        input.disabled = true;
-    });
-    
-    // Add a visual indication that save is in progress
-    const saveButton = document.getElementById('saveButton');
-    if (saveButton) {
-        saveButton.innerHTML = `
-            <div class="feature-icon mx-auto">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-            <h4>Saving...</h4>
-            <p>Please wait while your results are being saved</p>
-        `;
-    }
-}
-
-// Function to re-enable all buttons (used only if save operation fails)
-function enableAllButtons() {
-    // Re-enable all buttons except analyseButton which has its own logic
-    const buttons = document.querySelectorAll('button:not(#analyseButton)');
-    buttons.forEach(button => {
-        button.disabled = false;
-    });
-    
-    // Re-enable file select dropdown
-    const fileSelect = document.getElementById('fileSelect');
-    if (fileSelect) {
-        fileSelect.disabled = false;
-    }
-    
-    // Re-enable form inputs
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.disabled = false;
-    });
-    
-    // Re-enable select elements except fileSelect which was handled above
-    const selects = document.querySelectorAll('select:not(#fileSelect)');
-    selects.forEach(select => {
-        select.disabled = false;
-    });
-    
-    // Check if analyseButton should be enabled based on file selection
-    const analyseButton = document.getElementById('analyseButton');
-    if (analyseButton && fileSelect && fileSelect.value) {
-        analyseButton.disabled = false;
-    }
-    
-    // Restore original save button content
-    const saveButton = document.getElementById('saveButton');
-    if (saveButton) {
-        saveButton.innerHTML = `
-            <div class="feature-icon mx-auto">
-                <i class="fas fa-save"></i>
-            </div>
-            <h4>Save your results</h4>
-            <p>Click here to save your results!</p>
-        `;
-    }
-}
-
 function saveAnalysis() {
-    // Disable all buttons to prevent further interactions
-    disableAllButtons();
-    
     const analysisData = {
         filename: document.getElementById('fileSelect').value,
         frequencyArray: Array.from(currentAudioBuffer.getChannelData(0)),
@@ -507,23 +426,16 @@ function saveAnalysis() {
             document.getElementById('confirmShareButton').addEventListener('click', () => {
                 window.location.href = '/share';
             });
-            
-            // Do not re-enable buttons on successful save
-            // Keep everything disabled when successfully saved
         } else if (response.status === 401) {
             console.log('redirecting to login');
             window.location.href = '/signUp';
         } else {
             alert('Failed to save analysis. Response code: ' + response.status);
-            // Re-enable buttons only if save fails
-            enableAllButtons();
         }
     })
     .catch((error) => {
         console.error('Error saving analysis:', error);
         alert('An error occurred while saving the analysis.');
-        // Re-enable buttons on error
-        enableAllButtons();
     });
 }
 
@@ -595,4 +507,4 @@ window.addEventListener('beforeunload', function() {
     
     //if (uploadButton) uploadButton.style.display = 'block';
     //if (fileSelect) fileSelect.style.display = 'none';
-});
+} );
