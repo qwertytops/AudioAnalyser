@@ -21,21 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Disable the Share button itself
-            shareButton.disabled = true;
-            
-            // Disable the sidebar options
-            document.querySelectorAll('.sidebar-Option').forEach(option => {
-                option.classList.add('disabled');
-                option.style.pointerEvents = 'none';
-                option.style.opacity = '0.6';
-            });
-            
-            // Disable form elements
-            document.querySelector('textarea').disabled = true;
-            document.querySelectorAll('select').forEach(select => {
-                select.disabled = true;
-            });
+            // Disable all interactive elements while sharing
+            disableAllControls();
             
             // Update button text to show progress
             shareButton.textContent = 'Sharing...';
@@ -51,7 +38,52 @@ document.addEventListener('DOMContentLoaded', function() {
             shareAnalysis(data);
         });
     }
+    
+    // Look for modal close buttons and cancel buttons to ensure they work
+    document.addEventListener('click', function(event) {
+        // Check if this is a modal close or cancel button
+        if (event.target.classList.contains('modal-close') || 
+            event.target.id === 'cancelShare' ||
+            event.target.classList.contains('cancel-button')) {
+            
+            // Reset all controls when modal is closed
+            resetControls();
+            
+            // If there's a modal overlay, remove it
+            const modalOverlay = document.querySelector('.modal-overlay');
+            if (modalOverlay) {
+                modalOverlay.remove();
+            }
+            
+            // Prevent event from bubbling up
+            event.stopPropagation();
+        }
+    });
 });
+
+/**
+ * Function to disable all interactive controls
+ */
+function disableAllControls() {
+    // Disable the Share button itself
+    const shareButton = document.getElementById('shareButton');
+    if (shareButton) {
+        shareButton.disabled = true;
+    }
+    
+    // Disable the sidebar options
+    document.querySelectorAll('.sidebar-Option').forEach(option => {
+        option.classList.add('disabled');
+        option.style.pointerEvents = 'none';
+        option.style.opacity = '0.6';
+    });
+    
+    // Disable form elements
+    document.querySelector('textarea').disabled = true;
+    document.querySelectorAll('select').forEach(select => {
+        select.disabled = false; // Keep selects enabled in case user needs to change selection in modal
+    });
+}
 
 /**
  * Function to send share data to the server via AJAX
@@ -131,8 +163,10 @@ function handleFailedShare(errorMessage) {
 function resetControls() {
     // Re-enable share button and restore text
     const shareButton = document.getElementById('shareButton');
-    shareButton.disabled = false;
-    shareButton.textContent = 'Share';
+    if (shareButton) {
+        shareButton.disabled = false;
+        shareButton.textContent = 'Share';
+    }
     
     // Re-enable sidebar options
     document.querySelectorAll('.sidebar-Option').forEach(option => {
@@ -142,8 +176,34 @@ function resetControls() {
     });
     
     // Re-enable form elements
-    document.querySelector('textarea').disabled = false;
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+        textarea.disabled = false;
+    }
+    
     document.querySelectorAll('select').forEach(select => {
         select.disabled = false;
     });
+}
+
+/**
+ * Handle modal confirmation for sharing
+ * This should be called by the modal's Share button
+ */
+function confirmShare() {
+    // Get the Share button from the main form
+    const shareButton = document.getElementById('shareButton');
+    if (shareButton) {
+        // Re-enable it first to ensure the click event works
+        shareButton.disabled = false;
+        
+        // Trigger the click event programmatically
+        shareButton.click();
+    }
+    
+    // Remove the confirmation modal
+    const modal = document.querySelector('.share-modal');
+    if (modal) {
+        modal.remove();
+    }
 }
