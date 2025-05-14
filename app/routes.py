@@ -71,8 +71,6 @@ def save():
     data = request.get_json()
 
     analysis = AnalysisResult(
-        title="default_title",
-        description="default_description",
         createdAt=datetime.datetime.now(),
         userId=current_user.id,
         fileName=data.get('filename'),
