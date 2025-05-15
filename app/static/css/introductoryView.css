@@ -432,3 +432,46 @@ body {
     transition: color 0.2s ease;
 }
 
+.password-toggle {
+    cursor: pointer;
+    background-color: transparent;
+    border-color: #ced4da;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.password-toggle:hover {
+    color: #4361ee;
+    background-color: rgba(67, 97, 238, 0.1);
+}
+
+.password-toggle:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+[data-bs-theme="dark"] .password-toggle {
+    background-color: transparent;
+    border-color: #495057;
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .password-toggle:hover {
+    color: #4895ef;
+    background-color: rgba(72, 149, 239, 0.1);
+}
+
+/* Add this to improve the look of input groups with the password toggle */
+.input-group:focus-within {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+}
+
+/* Icon transition */
+.password-toggle i {
+    transition: transform 0.2s ease;
+}
+
+.password-toggle:hover i {
+    transform: scale(1.1);
+}
