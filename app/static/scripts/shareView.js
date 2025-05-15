@@ -170,9 +170,25 @@ function showShareResultModal(type, message, showNavigationOptions = false) {
         if (showNavigationOptions) {
             // Add buttons to navigate to account page or analyze another file
             const accountButton = document.createElement('a');
-            accountButton.href = '/account';
+            accountButton.href = '/account?section=history'; // Add URL parameter to trigger history section
             accountButton.className = 'btn btn-primary me-2';
-            accountButton.innerHTML = '<i class="fas fa-user-circle me-1"></i>Go to Account';
+            accountButton.id = 'viewHistoryBtn';
+            accountButton.innerHTML = '<i class="fas fa-history me-1"></i>View Analysis History';
+            
+            // Add click event to show loading state
+            accountButton.addEventListener('click', function(e) {
+                // Prevent default navigation
+                e.preventDefault();
+                
+                // Show loading state
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+                this.disabled = true;
+                
+                // Navigate to the account page after a brief delay
+                setTimeout(() => {
+                    window.location.href = this.href;
+                }, 100);
+            });
             
             const uploadButton = document.createElement('a');
             uploadButton.href = '/upload';
