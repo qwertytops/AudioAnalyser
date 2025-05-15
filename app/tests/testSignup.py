@@ -136,7 +136,7 @@ class TestSignup(unittest.TestCase):
         self.assertIsNone(User.query.filter_by(username='').first())
         self.assertIsNone(User.query.filter_by(email='').first())
 
-#############################################################
+
 
 
 if __name__ == '__main__':

@@ -53,8 +53,9 @@ def analysis():
 @main.route('/cleanupFiles', methods=['POST'])
 def cleanupFiles():
     try:
-        for filename in os.listdir(current_app.config['UPLOAD_FOLDER']):
-            filePath = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
+        upload_dir = current_app.config['UPLOAD_FOLDER']
+        for filename in os.listdir(upload_dir):
+            filePath = os.path.join(upload_dir, filename)
             if os.path.isfile(filePath):
                 os.unlink(filePath)
         return jsonify({"status": "success"}), 200
