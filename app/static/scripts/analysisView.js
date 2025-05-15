@@ -39,7 +39,6 @@ window.onload = function () {
     });
 };
 
-
 async function fetchFile(fileName) {
     const response = await fetch(`/static/uploads/${fileName}`);
     if (!response.ok) {
@@ -48,22 +47,31 @@ async function fetchFile(fileName) {
     return await response.blob();
 }
 
-/**function updateFileList(files) {
-   
-    files.forEach(file => {
-
-       
-    });
-} **/
-
-/**function displayFileName(file) {
-    const dropZoneText = document.getElementById('drop-zone-text');
-    if (file) {
-        dropZoneText.textContent = `Selected ${file.name}`;
-    } else {
-        dropZoneText.textContent = 'Drag & drop files here or click to browse';
+function showLoading() {
+    try {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+        } else {
+            console.error('Loading overlay not found');
+        }
+    } catch (error) {
+        console.error('Error in showLoading:', error);
     }
-}**/
+}
+
+function hideLoading() {
+    try {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        } else {
+            console.error('Loading overlay not found');
+        }
+    } catch (error) {
+        console.error('Error in hideLoading:', error);
+    }
+}
 
 function analyseFile(fileBlob, fileName) {
     const reader = new FileReader();
@@ -104,13 +112,8 @@ function analyseFile(fileBlob, fileName) {
 
             for (let i = 0; i < durationInSeconds; i += step) {
                 const stoptime = i;
-                // the trick is to call suspend at each time point you're interested in. 
-                // do not await since it won't ever happen - you can only suspend a running context,
-                // and we'll run it on the last line by calling startRendering. these will only start resolving as the context is rendering
-                // so we're essentially scheduling stopping time points
               
                 void offlineCtx.suspend(i).then((a) => {
-
                     analysisNode.getByteFrequencyData(dataArray);
                     maxLevel = Math.max(calculateDBFSFloat(analysisNode), maxLevel);
 
@@ -150,8 +153,6 @@ function analyseFile(fileBlob, fileName) {
 }
 
 function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLevel) {
-    // console.log("Frequency data is:", frequencyData);
-
     const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
 
     // Perform analysis
@@ -165,7 +166,6 @@ function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLeve
     frequencyData.forEach((value, index) => {
         const frequency = index * binSize;
         const signalLevel = 20 * Math.log10(value / 255);
-        // console.log(frequency, value);
 
         // Ignore 0 Hz and bins with no signal
         if (frequency > 0 && signalLevel > noiseFloor) {
@@ -180,9 +180,6 @@ function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLeve
         }
     });
 
-    // Calculate signal level in dBFS
-    // const signalLevel = 20 * Math.log10(maxAmplitude / 255);
-    // console.log(maxAmplitude, maxAmplitude / 255, Math.log10(maxAmplitude / 255), signalLevel);
     const signalLevel = maxLevel;
 
     analysisResult.signalLevel = signalLevel;
@@ -217,18 +214,10 @@ function frequencyToPitchStr(frequency) {
     const noteName = noteNames[noteIndex % 12];
 
     const standardNoteFrequency = A4 * Math.pow(2, (noteIndex - 69) / 12);
-
-    // Determine if the frequency is slightly higher or lower
     const difference = frequency - standardNoteFrequency;
     const tolerance = standardNoteFrequency * 0.01; // 2% tolerance for "slightly higher/lower"
 
     let suffix = "";
-    // if (difference > tolerance) {
-    //     suffix = "+";
-    // } else if (difference < -tolerance) {
-    //     suffix = "-";
-    // }
-
     return `${noteName}${octave}${suffix}`;
 }
 
@@ -280,7 +269,6 @@ function visualiseFullWaveform(audioBuffer) {
     const canvas = document.getElementById("oscilloscope");
     const canvasCtx = canvas.getContext("2d");
 
-    // Adjust canvas resolution for high-DPI displays without resizing
     const devicePixelRatio = window.devicePixelRatio || 1;
     const canvasWidth = canvas.offsetWidth;
     const canvasHeight = canvas.offsetHeight;
@@ -290,25 +278,20 @@ function visualiseFullWaveform(audioBuffer) {
 
     canvasCtx.scale(devicePixelRatio, devicePixelRatio);
 
-    // Get the audio data from the first channel
     const rawData = audioBuffer.getChannelData(0);
-
-    // Downsample the audio data to fit the canvas width
     const samplesPerPixel = Math.ceil(rawData.length / canvasWidth);
     const downsampledData = [];
     for (let i = 0; i < rawData.length; i += samplesPerPixel) {
         downsampledData.push(rawData[i]);
     }
 
-    // Normalize the data to fit within the canvas height
     const normalisedData = downsampledData.map(value => (value + 1) / 2 * canvasHeight);
 
     function drawWaveform() {
         canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-        // Draw the waveform
         canvasCtx.beginPath();
-        canvasCtx.moveTo(0, canvasHeight / 2); // Start at the middle of the canvas
+        canvasCtx.moveTo(0, canvasHeight / 2);
 
         for (let x = 0; x < normalisedData.length; x++) {
             const y = canvasHeight - normalisedData[x];
@@ -379,24 +362,17 @@ function calculateDBFSFloat(analyser) {
     const timeDomainData = new Uint8Array(bufferLength);
 
     analyser.getByteTimeDomainData(timeDomainData);
-    // console.log("tdd:", timeDomainData);
 
-    // Convert the byte data (0-255) to normalized amplitude (-1 to 1)
     const normalizedData = Array.from(timeDomainData).map(value => (value - 128) / 128);
-    // console.log("nd:", normalizedData);
-
-    // Calculate RMS (Root Mean Square) amplitude
     const rms = Math.sqrt(
         normalizedData.reduce((sum, value) => sum + value * value, 0) / bufferLength
     );
-    // console.log("rms:", rms);
-
-    // Calculate dBFS
     const dbfs = 20 * Math.log10(rms);
     return dbfs;
 }
 
 function saveAnalysis() {
+    showLoading();
     const analysisData = {
         filename: document.getElementById('fileSelect').value,
         frequencyArray: Array.from(currentAudioBuffer.getChannelData(0)),
@@ -411,7 +387,7 @@ function saveAnalysis() {
 
     fetch('/save', {
         method: 'POST',
-        headers: addCsrfHeader({  // Use the utility function to add CSRF token
+        headers: addCsrfHeader({
             'Content-Type': 'application/json',
         }),
         body: JSON.stringify(analysisData),
@@ -436,6 +412,9 @@ function saveAnalysis() {
     .catch((error) => {
         console.error('Error saving analysis:', error);
         alert('An error occurred while saving the analysis.');
+    })
+    .finally(() => {
+        hideLoading();
     });
 }
 
@@ -447,16 +426,14 @@ function toggleTheme() {
     htmlElement.setAttribute('data-bs-theme', newTheme);
     localStorage.setItem('theme', newTheme);
 }
+
 // Apply saved theme on page load
 document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-bs-theme', savedTheme);
     }
-});
 
-
-document.addEventListener('DOMContentLoaded', function() {
     // Hide oscilloscope and results sections initially
     const oscilloscope = document.querySelector('#oscilloscope'); 
     const resultsSection = document.querySelector('#data-area');
@@ -485,7 +462,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
 window.addEventListener('beforeunload', function() {
     const fileSelect = document.getElementById('fileSelect');
     const uploadButton = document.getElementById('uploadButton');
@@ -502,9 +478,4 @@ window.addEventListener('beforeunload', function() {
     }).catch(error => {
         console.error('Error sending delete request:', error);
     });
-
-    
-    
-    //if (uploadButton) uploadButton.style.display = 'block';
-    //if (fileSelect) fileSelect.style.display = 'none';
-} );
+});
