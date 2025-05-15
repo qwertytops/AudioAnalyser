@@ -344,25 +344,80 @@ textarea, .analysis-select {
     color: var(--dark-text);
 }
 
+/* Fix the suggestions list positioning and styling */
 .suggestions-list {
     list-style-type: none;
-    margin-top: 70px;
-    padding: 10px;
+    padding: 0;
+    margin: 0;
     border: 1px solid #ccc;
-    max-height: 150px;
+    max-height: 200px; /* Increased height */
     overflow-y: auto;
     background-color: #fff;
-    position: relative;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     z-index: 1000;
-    width: 80%;
+    border-radius: 0 0 6px 6px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode for suggestions list */
+[data-bs-theme="dark"] .suggestions-list {
+    background-color: #212529;
+    border-color: #495057;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .suggestion-item {
     padding: 8px 12px;
     cursor: pointer;
+    color: #333;
+}
+
+/* Dark mode for suggestion items */
+[data-bs-theme="dark"] .suggestion-item {
+    color: #e9ecef;
 }
 
 .suggestion-item:hover {
     background-color: #f0f0f0;
+}
+
+/* Dark mode for suggestion items hover state */
+[data-bs-theme="dark"] .suggestion-item:hover {
+    background-color: #343a40;
+}
+
+/* Fix the positioning of the friend section */
+.friend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; 
+    margin-top: 20px;
+    width: 60%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+/* Fix for input field in both light and dark mode */
+#recipientInput {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Dark mode for input field */
+[data-bs-theme="dark"] #recipientInput {
+    background-color: #212529;
+    border-color: #495057;
+    color: #e9ecef;
 }
