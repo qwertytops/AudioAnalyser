@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/navView.css') }}">
 
-<nav class="navbar navbar-expand-lg bg=light">
+<nav class="navbar navbar-expand-lg bg-light">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center" href="/">
             Audiometry <i class="fas fa-microphone-lines ms-2"></i>
@@ -21,10 +21,10 @@
                     <a class="nav-link" href="/upload">Upload</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/share">Share</a>
+                    <a class="nav-link" href="#" onclick="showLoading('/share')">Share</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/account">Account</a>
+                    <a class="nav-link" href="#" onclick="showLoading('/account')">Account</a>
                 </li>
             </ul>
             <div class="d-flex align-items-center" id="right">
@@ -46,23 +46,31 @@
                     <i class="fas fa-sun theme-icon sun-icon"></i>
                 </div>
             </button>
-
         </div>
     </div>
 </nav>
 
-<script>
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="custom-spinner">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="loading-text">Loading...</p>
+</div>
 
+<script>
 // Apply saved theme on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Apply theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
         document.documentElement.setAttribute('data-bs-theme', savedTheme);
         updateThemeIcon(savedTheme);
     }
     
-    // Update the signup link to include redirect info if we're not already on the signup page
     const currentPage = window.location.pathname;
     if (currentPage !== '/signUp') {
         const signUpLink = document.getElementById('signUpLink');
@@ -71,4 +79,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Show loading overlay and navigate after delay
+function showLoading(url) {
+    try {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+            // Simulate loading delay (replace with actual async process if needed)
+            setTimeout(() => {
+                window.location.href = url;
+            }, 2000); // 2-second delay
+        } else {
+            console.error('Loading overlay not found');
+            window.location.href = url; // Fallback navigation
+        }
+    } catch (error) {
+        console.error('Error in showLoading:', error);
+        window.location.href = url; // Fallback navigation
+    }
+}
 </script>
