@@ -88,19 +88,98 @@ def save():
     return jsonify({'message': 'Analysis saved successfully!'}), 200
 
 
-@app.route('/share')
+@app.route('/share', methods=['GET', 'POST'])
 @login_required
-def share():
-    return render_template('shareView.html')
+def share(analysisId=0):
+    if request.method == "POST":
+        data = request.get_json()
+        try:
+            analysisId = int(data.get('analysisId'))
+            toUsername = data.get('to')
+        except (ValueError, TypeError) as e:
+            return jsonify({'error': 'Invalid analysis ID format'}), 400
+
+        if not analysisId or not toUsername:
+            return jsonify({'error': 'Missing analysisId or recipient username'}), 400
+        
+        # Check if the analysis exists and belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysisId, userId=current_user.id).first()
+        if not analysis:
+            return jsonify({'error': 'Analysis not found or not authorized'}), 404
+        
+        # Check if the recipient user exists
+        recipient = User.query.filter_by(username=toUsername).first()
+        if not recipient:
+            return jsonify({'error': 'Recipient user not found'}), 404
+        
+        sharedResults = SharedResults(
+            analysisId=analysisId,
+            fromUser=current_user.id,
+            toUser=recipient.id,
+            message = data.get('message') or "No message",
+            date=datetime.datetime.now()
+        )
+        db.session.add(sharedResults)
+        db.session.commit()
+        flash("Analysis shared successfully!")
+
+        return jsonify({'message': 'Analysis saved successfully!'}), 200
+    else:
+        myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
+        if not myAnalyses:
+            flash("You have no analyses to share.", "warning")
+            return redirect(url_for('index'))
+        
+        # Get the most recent analysis if analysisId is not provided
+        most_recent_analysis = AnalysisResult.query.filter_by(userId=current_user.id).order_by(AnalysisResult.createdAt.desc()).first()
+        analysisId = analysisId if analysisId != 0 else (most_recent_analysis.id if most_recent_analysis else None)
+
+        return render_template('shareView.html', 
+                               myAnalyses=[(x.id, x.fileName) for x in myAnalyses],
+                               analysisId=analysisId)
 
 @app.route('/account')
 @login_required
 def account():
+    myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
+    
+    # Get shared analyses with related data
+    shared_analyses_data = (
+        db.session.query(
+            SharedResults,
+            AnalysisResult,
+            User
+        )
+        .join(
+            AnalysisResult,
+            SharedResults.analysisId == AnalysisResult.id
+        )
+        .join(
+            User,
+            SharedResults.fromUser == User.id
+        )
+        .filter(SharedResults.toUser == current_user.id)
+        .all()
+    )
+
+    # Format the data for the template
+    formattedShared = [{
+        'id': shared.id,
+        'fileName': analysis.fileName,
+        'fromUser': from_user.username,
+        'date': shared.date.strftime('%Y-%m-%d %H:%M'),
+        'message': shared.message,
+        'clipLength': analysis.clipLength,
+        'maxLevel': analysis.maxLevel,
+        'fundamentalFrequency': analysis.fundamentalFrequency
+    } for shared, analysis, from_user in shared_analyses_data]
+
     return render_template('accountView.html', 
-                           username=current_user.username,
-                           email=current_user.email,
-                           joinDate=current_user.createdAt,
-                           myAnalyses=AnalysisResult.query.filter_by(userId=current_user.id))
+                         username=current_user.username,
+                         email=current_user.email,
+                         joinDate=current_user.createdAt,
+                         myAnalyses=myAnalyses,
+                         sharedAnalyses=formattedShared)
 
 # New route to delete user's analysis history
 @app.route('/deleteHistory', methods=['POST'])
@@ -404,3 +483,33 @@ def logout():
     
     # Redirect to home page
     return redirect(url_for('index'))
+
+@app.route('/api/analysis/<int:analysis_id>', methods=['GET'])
+@login_required
+def get_analysis(analysis_id):
+    analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first()
+    if not analysis:
+        return jsonify({'error': 'Analysis not found'}), 404
+
+    return jsonify({
+        'id': analysis.id,
+        'fileName': analysis.fileName,
+        'clipLength': analysis.clipLength,
+        'maxLevel': analysis.maxLevel,
+        'highestFrequency': analysis.highestFrequency,
+        'lowestFrequency': analysis.lowestFrequency,
+        'fundamentalFrequency': analysis.fundamentalFrequency,
+        'frequencyArray': analysis.frequencyArray,
+        'createdAt': analysis.createdAt.strftime('%Y-%m-%d %H:%M:%S')
+    })
+
+@app.route('/api/users', methods=['GET'])
+@login_required
+def get_users():
+    query = request.args.get('q', '').strip()
+    if not query:
+        users = User.query.all()
+        return jsonify([user.username for user in users])
+
+    users = User.query.filter(User.username.ilike(f'%{query}%')).all()
+    return jsonify([user.username for user in users])
