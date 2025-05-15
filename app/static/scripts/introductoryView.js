@@ -79,9 +79,7 @@ function submitLogIn() {
             }, 1500);
         } else {
             // Login failed
-            const errorMessage = result.data.message || 'Invalid email/username or password';
-            displayLoginMessage(errorMessage, 'error');
-            console.error('Login failed:', errorMessage);
+            window.location.href = '/?showLogin=true'; 
         }
     })
     .catch(error => {

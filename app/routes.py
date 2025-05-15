@@ -5,6 +5,7 @@ from app import app, db
 from app.models import User, AnalysisResult, SharedResults
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.forms import LoginForm, SignUpForm
+from app.passwordHashing import verify_password
 import datetime
 import re
 import os
@@ -180,6 +181,216 @@ def account():
                          myAnalyses=myAnalyses,
                          sharedAnalyses=formattedShared)
 
+# New route to delete user's analysis history
+@app.route('/deleteHistory', methods=['POST'])
+@login_required
+def deleteHistory():
+    try:
+        # Delete all analysis results for the current user
+        AnalysisResult.query.filter_by(userId=current_user.id).delete()
+        
+        # Delete any shared results where this user is the sender
+        SharedResults.query.filter_by(fromUser=current_user.id).delete()
+        
+        # Commit the changes to the database
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Analysis history deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error deleting history: {str(e)}'}), 500
+
+
+@app.route('/updateProfile', methods=['POST'])
+@login_required
+def updateProfile():
+    try:
+        data = request.get_json()
+        
+        # Get the data from the request
+        new_username = data.get('username')
+        new_email = data.get('email')
+        current_password = data.get('currentPassword')
+        new_password = data.get('newPassword')
+        
+        # Verify the current password
+        if not verify_password(current_password, current_user.passwordHash):
+            return jsonify({'success': False, 'message': 'Incorrect current password', 'field': 'currentPassword'}), 400
+        
+        # Check if the username is being changed and if it's already taken
+        if new_username != current_user.username:
+            existing_user = User.query.filter_by(username=new_username).first()
+            if existing_user:
+                return jsonify({'success': False, 'message': f'Username "{new_username}" is already taken. Please choose another.', 'field': 'username'}), 400
+        
+        # Check if the email is being changed and if it's already taken
+        if new_email != current_user.email:
+            existing_email = User.query.filter_by(email=new_email).first()
+            if existing_email:
+                return jsonify({'success': False, 'message': f'Email "{new_email}" is already registered. Please use another email.', 'field': 'email'}), 400
+        
+        # Validate email format
+        if not is_valid_email(new_email):
+            return jsonify({'success': False, 'message': 'Please enter a valid email address.', 'field': 'email'}), 400
+        
+        # Update the user information
+        current_user.username = new_username
+        current_user.email = new_email
+        
+        # Update password if provided
+        if new_password:
+            # Validate new password
+            if not is_valid_password(new_password):
+                return jsonify({'success': False, 'message': 'Password must be at least 8 characters and contain both letters and numbers.', 'field': 'newPassword'}), 400
+            current_user.passwordHash = generate_password_hash(new_password)
+        
+        # Update the timestamp
+        current_user.updatedAt = datetime.datetime.now()
+        
+        # Save changes to database
+        db.session.commit()
+        
+        # Update session
+        session['username'] = current_user.username
+        
+        return jsonify({'success': True, 'message': 'Profile updated successfully!'}), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating profile: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error updating profile: {str(e)}'}), 500
+
+@app.route('/deleteAnalysis/<int:analysis_id>', methods=['POST'])
+@login_required
+def deleteAnalysis(analysis_id):
+    try:
+        # Find the analysis by ID and ensure it belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first_or_404()
+        
+        # Delete any shared results related to this analysis
+        SharedResults.query.filter_by(analysisId=analysis_id).delete()
+        
+        # Delete the analysis
+        db.session.delete(analysis)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Analysis deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error deleting analysis: {str(e)}'}), 500
+
+@app.route('/getAnalysis/<int:analysis_id>', methods=['GET'])
+@login_required
+def getAnalysis(analysis_id):
+    try:
+        # Find the analysis by ID and ensure it belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first_or_404()
+        
+        # Format the data to be returned
+        analysis_data = {
+            'fileName': analysis.fileName,
+            'clipLength': round(analysis.clipLength, 2),
+            'maxLevel': round(analysis.maxLevel, 2),
+            'highestFrequency': round(analysis.highestFrequency, 2),
+            'lowestFrequency': round(analysis.lowestFrequency, 2),
+            'fundamentalFrequency': round(analysis.fundamentalFrequency, 2),
+            'frequencyArray': analysis.frequencyArray
+        }
+        
+        return jsonify({'success': True, 'data': analysis_data}), 200
+    except Exception as e:
+        print(f"Error retrieving analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
+
+@app.route('/shareAnalysis/<int:analysis_id>', methods=['POST'])
+@login_required
+def shareAnalysis(analysis_id):
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        message = data.get('message', '')
+        
+        # Check if the analysis exists and belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first_or_404()
+        
+        # Find the user to share with
+        to_user = User.query.filter_by(username=username).first()
+        if not to_user:
+            return jsonify({'success': False, 'message': f'User "{username}" not found.'}), 404
+        
+        # Prevent sharing with yourself
+        if to_user.id == current_user.id:
+            return jsonify({'success': False, 'message': 'You cannot share an analysis with yourself.'}), 400
+        
+        # Check if already shared with this user
+        existing_share = SharedResults.query.filter_by(
+            analysisId=analysis_id,
+            fromUser=current_user.id,
+            toUser=to_user.id
+        ).first()
+        
+        if existing_share:
+            return jsonify({'success': False, 'message': f'Analysis already shared with {username}.'}), 400
+        
+        # Create a new shared result
+        shared_result = SharedResults(
+            analysisId=analysis_id,
+            fromUser=current_user.id,
+            toUser=to_user.id,
+            message=message,
+            date=datetime.datetime.now()
+        )
+        
+        db.session.add(shared_result)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': f'Analysis successfully shared with {username}!'}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error sharing analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error sharing analysis: {str(e)}'}), 500
+    
+# New route to delete user's account
+@app.route('/deleteAccount', methods=['POST'])
+@login_required
+def deleteAccount():
+    try:
+        data = request.get_json()
+        password = data.get('password')
+        
+        # Verify password
+        if not verify_password(password, current_user.passwordHash):
+            return jsonify({'success': False, 'message': 'Incorrect password'}), 400
+        
+        # Delete user's analysis results
+        AnalysisResult.query.filter_by(userId=current_user.id).delete()
+        
+        # Delete shared results where user is sender or receiver
+        SharedResults.query.filter((SharedResults.fromUser == current_user.id) | 
+                                  (SharedResults.toUser == current_user.id)).delete()
+        
+        # Store user ID before deletion
+        user_id = current_user.id
+        
+        # Log the user out
+        logout_user()
+        
+        # Delete the user
+        User.query.filter_by(id=user_id).delete()
+        
+        # Commit the changes to the database
+        db.session.commit()
+        
+        # Clear session data
+        session.clear()
+        
+        return jsonify({'success': True, 'message': 'Account deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error deleting account: {str(e)}'}), 500
+
 
 # Function to validate email format
 def is_valid_email(email):
@@ -214,7 +425,7 @@ def signUp():
         db.session.commit()
 
         # Get redirect URL from form or default to index
-        redirect_url = request.args.get('redirect', '/')
+        redirect_url = request.args.get('redirect', '/?showLogin=true')
 
         flash('Account created successfully!', 'success')
         return redirect(redirect_url)
@@ -256,6 +467,7 @@ def login():
             return redirect(next_page)
         else:
             flash('Invalid username/email or password. Please try again.', 'danger')
+            return redirect(url_for('index', showLogin='true'))
             
     # If GET request or login failed, show the login form
     return render_template('introductoryView.html', form=form)

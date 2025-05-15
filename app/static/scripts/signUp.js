@@ -191,3 +191,27 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Add password toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleSignUpPasswordBtn = document.getElementById('toggleSignUpPasswordBtn');
+    const signUpPasswordField = document.getElementById('signUpPassword');
+    
+    if (toggleSignUpPasswordBtn && signUpPasswordField) {
+        toggleSignUpPasswordBtn.addEventListener('click', function() {
+            // Toggle password visibility
+            const type = signUpPasswordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            signUpPasswordField.setAttribute('type', type);
+            
+            // Toggle icon
+            const icon = this.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    }
+});
