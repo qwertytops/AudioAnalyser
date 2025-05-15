@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const fundamentalFrequencyField = document.getElementById('fundamentalFrequencyField');
     const recipientInput = document.getElementById('recipientInput');
     const usernameSuggestions = document.getElementById('usernameSuggestions');
+    
+    // Get references to the modal elements
+    const shareResultModal = new bootstrap.Modal(document.getElementById('shareResultModal'));
+    const shareResultMessage = document.getElementById('shareResultMessage');
 
     // Function to fetch and populate analysis fields
     function populateAnalysisFields(analysisId) {
@@ -19,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    showShareResultModal('error', data.error);
                     return;
                 }
 
@@ -36,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => {
                 console.error('Error fetching analysis:', error);
-                alert('An error occurred while fetching the analysis data.');
+                showShareResultModal('error', 'An error occurred while fetching the analysis data.');
             });
     }
 
@@ -107,6 +111,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Helper function to show the share result modal
+function showShareResultModal(type, message) {
+    const shareResultModal = new bootstrap.Modal(document.getElementById('shareResultModal'));
+    const shareResultMessage = document.getElementById('shareResultMessage');
+    
+    // Set message content
+    shareResultMessage.textContent = message;
+    
+    // Set message style based on type
+    shareResultMessage.className = ''; // Reset classes
+    if (type === 'error') {
+        shareResultMessage.classList.add('text-danger');
+    } else {
+        shareResultMessage.classList.add('text-success');
+    }
+    
+    // Show the modal
+    shareResultModal.show();
+}
+
 function visualiseFullWaveform(rawData) {
     const canvas = document.getElementById("oscilloscope");
     const canvasCtx = canvas.getContext("2d");
@@ -161,12 +185,12 @@ function shareAnalysis() {
     const message = messageInput.value.trim();
 
     if (!selectedAnalysisId) {
-        alert('Please select an analysis to share.');
+        showShareResultModal('error', 'Please select an analysis to share.');
         return;
     }
 
     if (!recipientUsername) {
-        alert('Please enter a username to share with.');
+        showShareResultModal('error', 'Please enter a username to share with.');
         return;
     }
 
@@ -193,10 +217,14 @@ function shareAnalysis() {
     })
     .then(data => {
         console.log("Success response:", data);
-        alert('Analysis shared successfully!');
+        showShareResultModal('success', 'Analysis shared successfully!');
+        
+        // Optional: Clear input fields after successful share
+        recipientInput.value = '';
+        messageInput.value = '';
     })
     .catch(error => {
         console.error("Error details:", error);
-        alert(`Failed to share analysis: ${error.message}`);
+        showShareResultModal('error', `Failed to share analysis: ${error.message}`);
     });
 }
