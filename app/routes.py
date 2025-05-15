@@ -346,7 +346,7 @@ def signUp():
         db.session.commit()
 
         # Get redirect URL from form or default to index
-        redirect_url = request.args.get('redirect', '/')
+        redirect_url = request.args.get('redirect', '/?showLogin=true')
 
         flash('Account created successfully!', 'success')
         return redirect(redirect_url)
@@ -388,6 +388,7 @@ def login():
             return redirect(next_page)
         else:
             flash('Invalid username/email or password. Please try again.', 'danger')
+            return redirect(url_for('index', showLogin='true'))
             
     # If GET request or login failed, show the login form
     return render_template('introductoryView.html', form=form)
