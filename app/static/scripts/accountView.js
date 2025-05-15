@@ -504,6 +504,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (el) el.textContent = username;
                         });
                     }
+                    // Update displayed email in the sidebar if changed
+                    if (email !== originalEmail) {
+                        const emailDisplay = document.querySelector('.user-info p#email');
+                        if (emailDisplay) emailDisplay.textContent = email;
+                    }
                     
                     // Reset form state
                     profileForm.classList.remove('edit-mode');
