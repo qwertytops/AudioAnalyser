@@ -200,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.querySelector('.analysis-history-list')) {
         setupAnalysisDeleteButtons();
         setupAnalysisViewButtons();
+        setupAnalysisShareButtons();
     } 
 });
 
@@ -781,4 +782,124 @@ function drawWaveform(frequencyArray) {
     }
     
     ctx.stroke();
+}
+
+
+// Function to handle the share analysis button
+function setupAnalysisShareButtons() {
+    const shareAnalysisButtons = document.querySelectorAll('.history-item-actions .btn-outline-success');
+    const shareModal = new bootstrap.Modal(document.getElementById('shareAnalysisModal'));
+    const confirmShareBtn = document.getElementById('confirmShareBtn');
+    const shareForm = document.getElementById('shareAnalysisForm');
+    const shareStatusMessage = document.getElementById('shareStatusMessage');
+    
+    let currentAnalysisId = null;
+    let currentAnalysisName = null;
+    
+    shareAnalysisButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get the analysis ID and file name from the data attributes
+            currentAnalysisId = this.getAttribute('data-analysis-id');
+            currentAnalysisName = this.getAttribute('data-file-name');
+            
+            // Reset form
+            shareForm.reset();
+            document.getElementById('shareUsername').classList.remove('is-invalid');
+            shareStatusMessage.classList.add('d-none');
+            
+            // Set file name in the modal
+            document.getElementById('shareFileName').textContent = currentAnalysisName;
+            
+            // Show the modal
+            shareModal.show();
+        });
+    });
+    
+    // Handle the confirm button in the modal
+    confirmShareBtn.addEventListener('click', function() {
+        if (!currentAnalysisId) return;
+        
+        const username = document.getElementById('shareUsername').value.trim();
+        const message = document.getElementById('shareMessage').value.trim();
+        
+        // Validate username
+        if (!username) {
+            document.getElementById('shareUsername').classList.add('is-invalid');
+            document.getElementById('shareUsernameFeedback').textContent = 'Please enter a username.';
+            return;
+        }
+        
+        // Show loading state
+        const originalText = this.textContent;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sharing...';
+        this.disabled = true;
+        
+        // Clear any previous status messages
+        shareStatusMessage.classList.add('d-none');
+        
+        // Send share request
+        fetch(`/shareAnalysis/${currentAnalysisId}`, {
+            method: 'POST',
+            headers: addCsrfHeader({
+                'Content-Type': 'application/json'
+            }),
+            body: JSON.stringify({
+                username: username,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Reset button state
+            this.innerHTML = originalText;
+            this.disabled = false;
+            
+            // Show status message
+            shareStatusMessage.textContent = data.message;
+            shareStatusMessage.classList.remove('d-none', 'alert-success', 'alert-danger');
+            
+            if (data.success) {
+                shareStatusMessage.classList.add('alert-success');
+                
+                // Clear form
+                document.getElementById('shareUsername').value = '';
+                document.getElementById('shareMessage').value = '';
+                
+                // Close the modal after a delay
+                setTimeout(() => {
+                    shareModal.hide();
+                    
+                    // Show success message in the main page
+                    showAlert('success', data.message);
+                }, 1500);
+            } else {
+                shareStatusMessage.classList.add('alert-danger');
+                
+                // If user not found, mark field as invalid
+                if (data.message.includes('not found')) {
+                    document.getElementById('shareUsername').classList.add('is-invalid');
+                    document.getElementById('shareUsernameFeedback').textContent = data.message;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error sharing analysis:', error);
+            
+            // Reset button state
+            this.innerHTML = originalText;
+            this.disabled = false;
+            
+            // Show error message
+            shareStatusMessage.textContent = 'An error occurred while sharing the analysis.';
+            shareStatusMessage.classList.remove('d-none');
+            shareStatusMessage.classList.add('alert-danger');
+        });
+    });
+    
+    // Reset invalid state when typing
+    document.getElementById('shareUsername').addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+    });
 }

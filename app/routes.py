@@ -223,6 +223,55 @@ def getAnalysis(analysis_id):
     except Exception as e:
         print(f"Error retrieving analysis: {str(e)}")
         return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
+
+@app.route('/shareAnalysis/<int:analysis_id>', methods=['POST'])
+@login_required
+def shareAnalysis(analysis_id):
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        message = data.get('message', '')
+        
+        # Check if the analysis exists and belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first_or_404()
+        
+        # Find the user to share with
+        to_user = User.query.filter_by(username=username).first()
+        if not to_user:
+            return jsonify({'success': False, 'message': f'User "{username}" not found.'}), 404
+        
+        # Prevent sharing with yourself
+        if to_user.id == current_user.id:
+            return jsonify({'success': False, 'message': 'You cannot share an analysis with yourself.'}), 400
+        
+        # Check if already shared with this user
+        existing_share = SharedResults.query.filter_by(
+            analysisId=analysis_id,
+            fromUser=current_user.id,
+            toUser=to_user.id
+        ).first()
+        
+        if existing_share:
+            return jsonify({'success': False, 'message': f'Analysis already shared with {username}.'}), 400
+        
+        # Create a new shared result
+        shared_result = SharedResults(
+            analysisId=analysis_id,
+            fromUser=current_user.id,
+            toUser=to_user.id,
+            message=message,
+            date=datetime.datetime.now()
+        )
+        
+        db.session.add(shared_result)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': f'Analysis successfully shared with {username}!'}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error sharing analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error sharing analysis: {str(e)}'}), 500
     
 # New route to delete user's account
 @app.route('/deleteAccount', methods=['POST'])
