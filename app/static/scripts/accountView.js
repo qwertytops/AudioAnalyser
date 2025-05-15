@@ -608,8 +608,10 @@ function setupAnalysisDeleteButtons() {
     confirmDeleteBtn.addEventListener('click', function() {
         if (!currentAnalysisId || !currentDeleteButton) return;
         
+        // Store original button text
+        const originalText = this.innerHTML;
+        
         // Show loading state on the confirm button
-        const originalText = this.textContent;
         this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
         this.disabled = true;
         
@@ -622,6 +624,10 @@ function setupAnalysisDeleteButtons() {
         })
         .then(response => response.json())
         .then(data => {
+            // Reset button state before hiding the modal
+            this.innerHTML = originalText;
+            this.disabled = false;
+            
             // Hide the modal
             deleteModal.hide();
             
@@ -644,10 +650,6 @@ function setupAnalysisDeleteButtons() {
                 showAlert('danger', data.message || 'Failed to delete analysis.');
             }
             
-            // Reset button state
-            this.innerHTML = originalText;
-            this.disabled = false;
-            
             // Reset current references
             currentAnalysisId = null;
             currentDeleteButton = null;
@@ -656,12 +658,12 @@ function setupAnalysisDeleteButtons() {
             console.error('Error deleting analysis:', error);
             showAlert('danger', 'An error occurred while deleting the analysis.');
             
-            // Hide the modal
-            deleteModal.hide();
-            
             // Reset button state
             this.innerHTML = originalText;
             this.disabled = false;
+            
+            // Hide the modal
+            deleteModal.hide();
             
             // Reset current references
             currentAnalysisId = null;
