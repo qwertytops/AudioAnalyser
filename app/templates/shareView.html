@@ -1,62 +1,107 @@
 {% extends "base.html" %}
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shareView.css') }}">
 {% endblock %}
 {% block content %}
-<div class="main-content">
-    <div class="content">
-        <div class="section active" id="share">
-            <h1>Share</h1>
-            <div class="form-container">
-                <p>Add a message</p>
-                <textarea id="message" placeholder="send a message (optional)"></textarea>
-                <p>Select Analysis</p>
-                <select id="analysisSelect" class="analysis-select">
-                    {% for analysis in myAnalyses %}
-                    <option value="{{ analysis[0] }}">{{ analysis[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <p class="sum">Analysis Summary</p>
-            <div class="mt-5 text-center">
-                <canvas id="oscilloscope" width="500" height="200"></canvas>
-            </div>
-            <div class="analysis">
-                <div class="data">
-                    <div class="data-label">Clip Length</div>
-                    <div id="clipLengthField" class="data-value">-</div>
+
+<div class="container app-container">
+    <div class="app-header">
+        <h1 class="display-4 app-title">Share Your Analysis</h1>
+        <p class="app-subtitle">Share your audio analysis results with other Audiometry users</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Share Analysis</h5>
                 </div>
-                <div class="data">
-                    <div class="data-label">Max level (dBFS)</div>
-                    <div id="maxLevelField" class="data-value">-</div>
+                <div class="card-body">
+                    <form id="shareForm">
+                        <div class="mb-4">
+                            <label for="analysisSelect" class="form-label fw-bold">Select Analysis</label>
+                            <select id="analysisSelect" class="form-select">
+                                {% for analysis in myAnalyses %}
+                                <option value="{{ analysis[0] }}">{{ analysis[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="message" class="form-label fw-bold">Add a Message (Optional)</label>
+                            <textarea id="message" class="form-control" rows="3" 
+                                placeholder="Add a message to go along with your analysis"></textarea>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <label for="recipientInput" class="form-label fw-bold">Share with User</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" id="recipientInput" class="form-control" 
+                                    placeholder="Enter a username">
+                            </div>
+                            <ul id="usernameSuggestions" class="suggestions-list list-group position-absolute w-100 z-1"></ul>
+                        </div>
+                    </form>
+
+                    <h5 class="mt-5 mb-3">Analysis Summary</h5>
+                    <div class="mt-4 text-center">
+                        <canvas id="oscilloscope" width="600" height="200" 
+                            class="border border-primary rounded mb-4"></canvas>
+                    </div>
+
+                    <div class="data-grid">
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h5>Clip Length</h5>
+                            <p id="clipLengthField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <h5>Max Level</h5>
+                            <p id="maxLevelField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <h5>Highest Frequency</h5>
+                            <p id="highestFrequencyField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <h5>Lowest Frequency</h5>
+                            <p id="lowestFrequencyField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <h5>Fundamental Frequency</h5>
+                            <p id="fundamentalFrequencyField" class="fw-bold">-</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary" id="shareButton" onclick="shareAnalysis()">
+                            <i class="fas fa-share me-2"></i>Share Analysis
+                        </button>
+                    </div>
                 </div>
-                <div class="data">
-                    <div class="data-label">Highest Frequency</div>
-                    <div id="highestFrequencyField" class="data-value">-</div>
-                </div>
-                <div class="data">
-                    <div class="data-label">Lowest Frequency</div>
-                    <div id="lowestFrequencyField" class="data-value">-</div>
-                </div>
-                <div class="data">
-                    <div class="data-label">Fundamental Frequency</div>
-                    <div id="fundamentalFrequencyField" class="data-value">-</div>
-                </div>
-            </div>
-            <div class="friend position-relative">
-                <label for="recipientInput" class="friend-label fw-bold mb-2">Share with:</label>
-                <input type="text" id="recipientInput" class="form-control" placeholder="Enter a username or email">
-                <ul id="usernameSuggestions" class="suggestions-list list-group position-absolute h-150 w-20"></ul>
-            </div>
-            <div class="shareButton mt-4">
-                <button type="button" class="btn btn-primary" id="shareButton" onclick="shareAnalysis()">Share</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Share Result Modal -->
-<div class="modal fade" id="shareResultModal" tabindex="-1" aria-labelledby="shareResultModalLabel" aria-hidden="true">
+<div class="modal fade" id="shareResultModal" tabindex="-1" aria-labelledby="shareResultModalLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
