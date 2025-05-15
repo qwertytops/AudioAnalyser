@@ -121,6 +121,66 @@ def deleteHistory():
         db.session.rollback()
         return jsonify({'success': False, 'message': f'Error deleting history: {str(e)}'}), 500
 
+
+@app.route('/updateProfile', methods=['POST'])
+@login_required
+def updateProfile():
+    try:
+        data = request.get_json()
+        
+        # Get the data from the request
+        new_username = data.get('username')
+        new_email = data.get('email')
+        current_password = data.get('currentPassword')
+        new_password = data.get('newPassword')
+        
+        # Verify the current password
+        if not verify_password(current_password, current_user.passwordHash):
+            return jsonify({'success': False, 'message': 'Incorrect current password', 'field': 'currentPassword'}), 400
+        
+        # Check if the username is being changed and if it's already taken
+        if new_username != current_user.username:
+            existing_user = User.query.filter_by(username=new_username).first()
+            if existing_user:
+                return jsonify({'success': False, 'message': f'Username "{new_username}" is already taken. Please choose another.', 'field': 'username'}), 400
+        
+        # Check if the email is being changed and if it's already taken
+        if new_email != current_user.email:
+            existing_email = User.query.filter_by(email=new_email).first()
+            if existing_email:
+                return jsonify({'success': False, 'message': f'Email "{new_email}" is already registered. Please use another email.', 'field': 'email'}), 400
+        
+        # Validate email format
+        if not is_valid_email(new_email):
+            return jsonify({'success': False, 'message': 'Please enter a valid email address.', 'field': 'email'}), 400
+        
+        # Update the user information
+        current_user.username = new_username
+        current_user.email = new_email
+        
+        # Update password if provided
+        if new_password:
+            # Validate new password
+            if not is_valid_password(new_password):
+                return jsonify({'success': False, 'message': 'Password must be at least 8 characters and contain both letters and numbers.', 'field': 'newPassword'}), 400
+            current_user.passwordHash = generate_password_hash(new_password)
+        
+        # Update the timestamp
+        current_user.updatedAt = datetime.datetime.now()
+        
+        # Save changes to database
+        db.session.commit()
+        
+        # Update session
+        session['username'] = current_user.username
+        
+        return jsonify({'success': True, 'message': 'Profile updated successfully!'}), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating profile: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error updating profile: {str(e)}'}), 500
+    
 # New route to delete user's account
 @app.route('/deleteAccount', methods=['POST'])
 @login_required
