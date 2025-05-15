@@ -195,6 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 5000);
         }
     }
+            
+    // Setup delete analysis buttons if we're on the history section
+    if (document.querySelector('.analysis-history-list')) {
+        setupAnalysisDeleteButtons();
+    } 
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -566,6 +571,69 @@ document.addEventListener('DOMContentLoaded', function() {
                 alertDiv.classList.remove('show');
                 setTimeout(() => alertDiv.remove(), 150);
             }, 5000);
-        }
+        } 
     }
 });
+
+// Function to handle the delete analysis button
+function setupAnalysisDeleteButtons() {
+    const deleteAnalysisButtons = document.querySelectorAll('.history-item-actions .btn-outline-danger');
+    
+    deleteAnalysisButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get the analysis ID from the data attribute
+            const analysisId = this.getAttribute('data-analysis-id');
+            
+            // Confirm deletion
+            if (confirm('Are you sure you want to delete this analysis? This action cannot be undone.')) {
+                // Show loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
+                this.disabled = true;
+                
+                // Send delete request
+                fetch(`/deleteAnalysis/${analysisId}`, {
+                    method: 'POST',
+                    headers: addCsrfHeader({
+                        'Content-Type': 'application/json'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the analysis item from the DOM
+                        const historyItem = this.closest('.history-item');
+                        historyItem.remove();
+                        
+                        // Show success message
+                        showAlert('success', data.message);
+                        
+                        // Check if there are any analyses left
+                        const historyList = document.querySelector('.analysis-history-list');
+                        if (historyList && historyList.children.length === 0) {
+                            // Show empty state
+                            document.querySelector('.analysis-history-empty').classList.remove('d-none');
+                        }
+                    } else {
+                        // Show error
+                        showAlert('danger', data.message || 'Failed to delete analysis.');
+                        
+                        // Reset button state
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting analysis:', error);
+                    showAlert('danger', 'An error occurred while deleting the analysis.');
+                    
+                    // Reset button state
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                });
+            }
+        });
+    });
+}

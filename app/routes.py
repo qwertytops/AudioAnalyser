@@ -180,6 +180,26 @@ def updateProfile():
         db.session.rollback()
         print(f"Error updating profile: {str(e)}")
         return jsonify({'success': False, 'message': f'Error updating profile: {str(e)}'}), 500
+
+@app.route('/deleteAnalysis/<int:analysis_id>', methods=['POST'])
+@login_required
+def deleteAnalysis(analysis_id):
+    try:
+        # Find the analysis by ID and ensure it belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first_or_404()
+        
+        # Delete any shared results related to this analysis
+        SharedResults.query.filter_by(analysisId=analysis_id).delete()
+        
+        # Delete the analysis
+        db.session.delete(analysis)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Analysis deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error deleting analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error deleting analysis: {str(e)}'}), 500
     
 # New route to delete user's account
 @app.route('/deleteAccount', methods=['POST'])
