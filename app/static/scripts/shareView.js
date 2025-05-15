@@ -204,14 +204,7 @@ function showShareResultModal(type, message, showNavigationOptions = false) {
     // Show the modal
     const modal = new bootstrap.Modal(shareResultModal);
     modal.show();
-    
-    // Auto-dismiss success modals after 6 seconds if not an error
-    if (type !== 'error') {
-        setTimeout(() => {
-            modal.hide();
-        }, 6000);
-    }
-    
+        
     // Ensure the modal backdrop is removed when the modal is closed
     shareResultModal.addEventListener('hidden.bs.modal', function (event) {
         // Remove any lingering backdrop
