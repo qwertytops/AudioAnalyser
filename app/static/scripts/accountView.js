@@ -199,6 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup delete analysis buttons if we're on the history section
     if (document.querySelector('.analysis-history-list')) {
         setupAnalysisDeleteButtons();
+        setupAnalysisViewButtons();
     } 
 });
 
@@ -661,4 +662,123 @@ function setupAnalysisDeleteButtons() {
             currentDeleteButton = null;
         });
     });
+}
+
+// Function to handle the view analysis button
+function setupAnalysisViewButtons() {
+    const viewAnalysisButtons = document.querySelectorAll('.history-item-actions .btn-outline-primary');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewAnalysisModal'));
+    
+    viewAnalysisButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get the analysis ID from the data attribute
+            const analysisId = this.getAttribute('data-analysis-id');
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            this.disabled = true;
+            
+            // Fetch analysis data
+            fetch(`/getAnalysis/${analysisId}`, {
+                method: 'GET',
+                headers: addCsrfHeader({
+                    'Content-Type': 'application/json'
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Reset button state
+                this.innerHTML = originalText;
+                this.disabled = false;
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    // Update modal title and fields
+                    document.getElementById('analysisFileName').textContent = data.fileName;
+                    document.getElementById('viewClipLength').textContent = `${data.clipLength} seconds`;
+                    document.getElementById('viewMaxLevel').textContent = `${data.maxLevel} dBFS`;
+                    document.getElementById('viewHighestFreq').textContent = `${data.highestFrequency} Hz`;
+                    document.getElementById('viewLowestFreq').textContent = `${data.lowestFrequency} Hz`;
+                    document.getElementById('viewFundamentalFreq').textContent = `${data.fundamentalFrequency} Hz`;
+                    
+                    // Draw the waveform
+                    drawWaveform(data.frequencyArray);
+                    
+                    // Show the modal
+                    viewModal.show();
+                } else {
+                    showAlert('danger', result.message || 'Failed to load analysis details.');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading analysis:', error);
+                showAlert('danger', 'An error occurred while loading the analysis details.');
+                
+                // Reset button state
+                this.innerHTML = originalText;
+                this.disabled = false;
+            });
+        });
+    });
+}
+
+// Function to draw the waveform in the modal
+function drawWaveform(frequencyArray) {
+    const canvas = document.getElementById('viewOscilloscope');
+    const ctx = canvas.getContext('2d');
+    
+    // Clear previous content
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Set up canvas
+    ctx.fillStyle = 'rgb(240, 240, 240)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Convert frequency array to array if it's a string
+    let dataArray = frequencyArray;
+    if (typeof frequencyArray === 'string') {
+        try {
+            dataArray = JSON.parse(frequencyArray);
+        } catch (e) {
+            console.error('Error parsing frequency array:', e);
+            return;
+        }
+    }
+    
+    // Ensure dataArray is an array
+    if (!Array.isArray(dataArray)) {
+        console.error('Frequency array is not an array:', dataArray);
+        return;
+    }
+    
+    // Sample the data to fit canvas width
+    const step = Math.ceil(dataArray.length / canvas.width);
+    const sampledData = [];
+    for (let i = 0; i < dataArray.length; i += step) {
+        sampledData.push(dataArray[i]);
+    }
+    
+    // Draw the waveform
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgb(0, 8, 255)';
+    
+    // Start at the middle of the canvas
+    ctx.moveTo(0, canvas.height / 2);
+    
+    // Draw the lines
+    const sliceWidth = canvas.width / sampledData.length;
+    for (let i = 0; i < sampledData.length; i++) {
+        const value = sampledData[i];
+        const y = ((value + 1) / 2) * canvas.height;
+        const x = i * sliceWidth;
+        
+        ctx.lineTo(x, y);
+    }
+    
+    ctx.stroke();
 }

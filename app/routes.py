@@ -200,6 +200,29 @@ def deleteAnalysis(analysis_id):
         db.session.rollback()
         print(f"Error deleting analysis: {str(e)}")
         return jsonify({'success': False, 'message': f'Error deleting analysis: {str(e)}'}), 500
+
+@app.route('/getAnalysis/<int:analysis_id>', methods=['GET'])
+@login_required
+def getAnalysis(analysis_id):
+    try:
+        # Find the analysis by ID and ensure it belongs to the current user
+        analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first_or_404()
+        
+        # Format the data to be returned
+        analysis_data = {
+            'fileName': analysis.fileName,
+            'clipLength': round(analysis.clipLength, 2),
+            'maxLevel': round(analysis.maxLevel, 2),
+            'highestFrequency': round(analysis.highestFrequency, 2),
+            'lowestFrequency': round(analysis.lowestFrequency, 2),
+            'fundamentalFrequency': round(analysis.fundamentalFrequency, 2),
+            'frequencyArray': analysis.frequencyArray
+        }
+        
+        return jsonify({'success': True, 'data': analysis_data}), 200
+    except Exception as e:
+        print(f"Error retrieving analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
     
 # New route to delete user's account
 @app.route('/deleteAccount', methods=['POST'])
