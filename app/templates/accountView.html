@@ -445,13 +445,14 @@
                 <h6 id="shareFileName" class="text-center mb-3"></h6>
 
                 <form id="shareAnalysisForm">
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label for="shareUsername" class="form-label">Share with User</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                             <input type="text" class="form-control" id="shareUsername" placeholder="Enter username"
-                                required>
+                                autocomplete="off" required>
                         </div>
+                        <ul id="shareUsernameSuggestions" class="suggestions-list list-group position-absolute w-100 z-1"></ul>
                         <div class="invalid-feedback" id="shareUsernameFeedback">
                             Please enter a valid username.
                         </div>
@@ -497,7 +498,6 @@
 <script src="{{ url_for('static', filename='scripts/accountView.js') }}"></script>
 
 <script>
-// Immediate fix for the shared remove buttons
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM loaded - setting up immediate fix for shared remove buttons");
     
