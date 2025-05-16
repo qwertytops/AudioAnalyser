@@ -10,7 +10,8 @@ window.onload = function () {
     const analyseButton = document.getElementById('analyseButton');
 
     const options = fileSelect.options;
-    for (let i = 1; i < options.length; i++) { // skip placeholder and append files to memory
+    // skip placeholder and append files to memory
+    for (let i = 1; i < options.length; i++) {
         filesInMemory.push({ name: options[i].value });
     }
 
@@ -84,6 +85,7 @@ function analyseFile(fileBlob, fileName) {
             currentAudioBuffer = audioBuffer;
             visualiseFullWaveform(audioBuffer); // works with regular audio context
 
+            // set up offline audio context
             const offlineCtx = new OfflineAudioContext(
                 audioBuffer.numberOfChannels,
                 audioBuffer.length,
@@ -110,10 +112,11 @@ function analyseFile(fileBlob, fileName) {
 
             let maxLevel = -Infinity;
 
+            // get data from audio
             for (let i = 0; i < durationInSeconds; i += step) {
                 const stoptime = i;
               
-                void offlineCtx.suspend(i).then((a) => {
+                void offlineCtx.suspend(i).then(() => {
                     analysisNode.getByteFrequencyData(dataArray);
                     maxLevel = Math.max(calculateDBFSFloat(analysisNode), maxLevel);
 
@@ -130,12 +133,14 @@ function analyseFile(fileBlob, fileName) {
             fullArray.forEach((_, index) => {
                 fullArray[index] = fullArray[index] / totalSteps;
             });
-            analyzeAudioData(fullArray, analysisNode, audioBuffer.sampleRate, audioBuffer.duration, maxLevel);
+
+            // analyse the data
+            analyseAudioData(fullArray, analysisNode, audioBuffer.sampleRate, audioBuffer.duration, maxLevel);
 
             // Setup play, pause, and stop controls
             setupAudioControls(audioBuffer);
 
-            // Smoothly scroll to the analyse button
+            // Scroll to the analyse button
             document.getElementById('analyseButton').scrollIntoView({ behavior: "smooth", block: "start" });
         }, (error) => {
             console.error('Error decoding audio file:', error);
@@ -148,11 +153,10 @@ function analyseFile(fileBlob, fileName) {
         alert('Error reading file');
     };
 
-    // Read the file as an ArrayBuffer
     reader.readAsArrayBuffer(fileBlob);
 }
 
-function analyzeAudioData(frequencyData, analyser, sampleRate, duration, maxLevel) {
+function analyseAudioData(frequencyData, analyser, sampleRate, duration, maxLevel) {
     const noiseFloor = parseFloat(document.getElementById('noiseFloor').value);
 
     // Perform analysis
@@ -217,11 +221,10 @@ function frequencyToPitchStr(frequency) {
     const difference = frequency - standardNoteFrequency;
     const tolerance = standardNoteFrequency * 0.01; // 2% tolerance for "slightly higher/lower"
 
-    let suffix = "";
-    return `${noteName}${octave}${suffix}`;
+    return `${noteName}${octave}`;
 }
 
-function visualizeAudio() {
+function visualiseAudio() {
     const canvas = document.getElementById("oscilloscope");
     const canvasCtx = canvas.getContext("2d");
 
@@ -265,6 +268,7 @@ function visualizeAudio() {
     draw();
 }
 
+// draws waveform on canvas
 function visualiseFullWaveform(audioBuffer) {
     const canvas = document.getElementById("oscilloscope");
     const canvasCtx = canvas.getContext("2d");
@@ -470,8 +474,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 window.addEventListener('beforeunload', function() {
-    const fileSelect = document.getElementById('fileSelect');
-    const uploadButton = document.getElementById('uploadButton');
     this.fetch('/cleanupFiles', {
         method: 'POST',
         headers: addCsrfHeader({
