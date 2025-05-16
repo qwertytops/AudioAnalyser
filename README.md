@@ -17,8 +17,11 @@ Users can upload audio files for analysis, and the app will display detailed inf
 |23161121    |    Abdi Muhudin        |    fonkayy         |
 
 
-3. ...
-
+3. ## How to run application
+- activate virtual environment
+- install packages: `pip install -r requirements.txt`
+- `flask run`
+- That's it
 
 4. ...
 
