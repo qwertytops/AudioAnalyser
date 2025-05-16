@@ -106,6 +106,9 @@ def share(analysisId=0):
         if not analysisId or not toUsername:
             return jsonify({'error': 'Missing analysisId or recipient username'}), 400
         
+        if toUsername == current_user.username:
+            return jsonify({'error': 'Sharing with yourself is not permitted'}), 400
+        
         # Check if the analysis exists and belongs to the current user
         analysis = AnalysisResult.query.filter_by(id=analysisId, userId=current_user.id).first()
         if not analysis:
