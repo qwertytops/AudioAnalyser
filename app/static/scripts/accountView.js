@@ -22,6 +22,30 @@ if (sectionParam === 'history') {
     }
 }
 
+// Helper function to show alerts
+function showAlert(type, message) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert alert at the top of the main content
+    const mainContent = document.querySelector('.col-md-8');
+    if (mainContent) {
+        mainContent.prepend(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
+        }, 5000);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Menu switching functionality
     const menuItems = document.querySelectorAll('.account-menu-item');
@@ -195,30 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Helper function to show alerts
-    function showAlert(type, message) {
-        // Create alert element
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Insert alert at the top of the main content
-        const mainContent = document.querySelector('.col-md-8');
-        if (mainContent) {
-            mainContent.prepend(alertDiv);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-                setTimeout(() => alertDiv.remove(), 150);
-            }, 5000);
-        }
-    }
             
     // Setup delete analysis buttons if we're on the history section
     if (document.querySelector('.analysis-history-list')) {
@@ -226,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupAnalysisViewButtons();
         setupAnalysisShareButtons();
     } 
+    setupExportButton();
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -580,30 +581,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Helper function to show alerts
-    function showAlert(type, message) {
-        // Create alert element
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Insert alert at the top of the main content
-        const mainContent = document.querySelector('.col-md-8');
-        if (mainContent) {
-            mainContent.prepend(alertDiv);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-                setTimeout(() => alertDiv.remove(), 150);
-            }, 5000);
-        } 
-    }
 });
 
 // Function to handle the delete analysis button
@@ -933,4 +910,58 @@ function setupAnalysisShareButtons() {
     document.getElementById('shareUsername').addEventListener('input', function() {
         this.classList.remove('is-invalid');
     });
+}
+
+function setupExportButton() {
+    const exportBtn = document.getElementById('exportHistoryBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Exporting...';
+            this.disabled = true;
+
+            // Make request to export endpoint
+            fetch('/export-history', {
+                method: 'GET',
+                headers: addCsrfHeader({})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+                // Get filename from Content-Disposition header
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = 'analysis_history.csv';
+                if (disposition && disposition.includes('filename=')) {
+                    filename = disposition.split('filename=')[1].replace(/['"]/g, '');
+                }
+                return response.blob().then(blob => ({ blob, filename }));
+            })
+            .then(({ blob, filename }) => {
+                // Create and trigger download
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;  // Use the filename from the server
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                showAlert('success', 'Analysis history exported successfully!');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                showAlert('danger', 'Failed to export analysis history. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                this.innerHTML = originalText;
+                this.disabled = false;
+            });
+        });
+    }
 }

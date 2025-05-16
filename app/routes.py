@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, session, request, jsonify
+from flask import render_template, flash, redirect, url_for, session, request, jsonify, send_file
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 from app import app, db
@@ -9,6 +9,8 @@ from app.passwordHashing import verify_password
 import datetime
 import re
 import os
+import csv
+from io import StringIO, BytesIO
 
 
 uploadFolder = 'app/static/uploads/'
@@ -62,7 +64,7 @@ def cleanupFiles():
         print(e)
         return jsonify({"status": "error"}), 500
         
-@app.route('/save', methods=['GET', 'POST'])
+@app.route('/save', methods=['POST'])
 def save():
 
     if not current_user.is_authenticated:
@@ -127,8 +129,7 @@ def share(analysisId=0):
     else:
         myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
         if not myAnalyses:
-            flash("You have no analyses to share.", "warning")
-            return redirect(url_for('index'))
+            return redirect(url_for('upload'))
         
         # Get the most recent analysis if analysisId is not provided
         most_recent_analysis = AnalysisResult.query.filter_by(userId=current_user.id).order_by(AnalysisResult.createdAt.desc()).first()
@@ -404,8 +405,6 @@ def is_valid_password(password):
             re.search(r'[A-Za-z]', password) and 
             re.search(r'\d', password))
 
-
-
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
     form = SignUpForm()
@@ -513,3 +512,47 @@ def get_users():
 
     users = User.query.filter(User.username.ilike(f'%{query}%')).all()
     return jsonify([user.username for user in users])
+
+@app.route('/export-history')
+@login_required
+def export_history():
+    # Get all analyses for the current user
+    analyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
+    
+    # Create a string buffer and write to it
+    si = StringIO()
+    writer = csv.writer(si)
+    
+    # Write headers
+    writer.writerow(['File Name', 'Created At', 'Clip Length (s)', 'Max Level (dBFS)', 
+                    'Highest Frequency (Hz)', 'Lowest Frequency (Hz)', 
+                    'Fundamental Frequency (Hz)'])
+    
+    # Write data rows
+    for analysis in analyses:
+        writer.writerow([
+            analysis.fileName,
+            analysis.createdAt.strftime('%Y-%m-%d %H:%M:%S'),
+            round(analysis.clipLength, 2),
+            round(analysis.maxLevel, 2),
+            round(analysis.highestFrequency, 2),
+            round(analysis.lowestFrequency, 2),
+            round(analysis.fundamentalFrequency, 2)
+        ])
+    
+    # Get the value and convert to bytes
+    output = si.getvalue().encode('utf-8')
+    si.close()
+    
+    # Create a BytesIO object
+    mem = BytesIO()
+    mem.write(output)
+    mem.seek(0)
+    
+    # Create response
+    return send_file(
+        mem,
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'analysis_history_{current_user.username}_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    )
