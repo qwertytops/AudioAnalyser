@@ -399,8 +399,15 @@ function saveAnalysis() {
             shareModal.show();
 
             // Add event listener to the "Share" button in the modal
-            document.getElementById('confirmShareButton').addEventListener('click', () => {
-                window.location.href = '/share';
+            document.getElementById('confirmShareButton').addEventListener('click', function() {
+                // Show loading state
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+                this.disabled = true;
+                
+                // Navigate to the share page after a brief delay
+                setTimeout(() => {
+                    window.location.href = '/share';
+                }, 100);
             });
         } else if (response.status === 401) {
             console.log('redirecting to login');
