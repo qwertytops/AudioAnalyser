@@ -506,12 +506,19 @@ def get_analysis(analysis_id):
 @login_required
 def get_users():
     query = request.args.get('q', '').strip()
+    ignore_self = False if request.args.get('self') == 'false' else True
     if not query:
         users = User.query.all()
-        return jsonify([user.username for user in users])
+        if not ignore_self:
+            return jsonify([user.username for user in users])
+        else:
+            return jsonify([user.username for user in users if user.id != current_user.id])
 
     users = User.query.filter(User.username.ilike(f'%{query}%')).all()
-    return jsonify([user.username for user in users])
+    if not ignore_self:
+        return jsonify([user.username for user in users])
+    else:
+        return jsonify([user.username for user in users if user.id != current_user.id])
 
 @app.route('/export-history')
 @login_required
