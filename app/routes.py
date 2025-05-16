@@ -1,8 +1,8 @@
 from flask import render_template, flash, redirect, url_for, session, request, jsonify, Blueprint, current_app
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
-from app import app, db
-from app.models import User, AnalysisResult
+from app import db
+from app.models import User, AnalysisResult, SharedResults
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.forms import LoginForm, SignUpForm
 from app.passwordHashing import verify_password
@@ -90,7 +90,7 @@ def save():
     return jsonify({'message': 'Analysis saved successfully!'}), 200
 
 
-@app.route('/share')
+@main.route('/share')
 @login_required
 def share(analysisId=0):
     if request.method == "POST":
@@ -130,7 +130,7 @@ def share(analysisId=0):
         myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
         if not myAnalyses:
             flash("You have no analyses to share.", "warning")
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
         
         # Get the most recent analysis if analysisId is not provided
         most_recent_analysis = AnalysisResult.query.filter_by(userId=current_user.id).order_by(AnalysisResult.createdAt.desc()).first()
@@ -184,7 +184,7 @@ def account():
                          sharedAnalyses=formattedShared)
 
 # New route to delete user's analysis history
-@app.route('/deleteHistory', methods=['POST'])
+@main.route('/deleteHistory', methods=['POST'])
 @login_required
 def deleteHistory():
     try:
@@ -203,7 +203,7 @@ def deleteHistory():
         return jsonify({'success': False, 'message': f'Error deleting history: {str(e)}'}), 500
 
 
-@app.route('/updateProfile', methods=['POST'])
+@main.route('/updateProfile', methods=['POST'])
 @login_required
 def updateProfile():
     try:
@@ -262,7 +262,7 @@ def updateProfile():
         print(f"Error updating profile: {str(e)}")
         return jsonify({'success': False, 'message': f'Error updating profile: {str(e)}'}), 500
 
-@app.route('/deleteAnalysis/<int:analysis_id>', methods=['POST'])
+@main.route('/deleteAnalysis/<int:analysis_id>', methods=['POST'])
 @login_required
 def deleteAnalysis(analysis_id):
     try:
@@ -282,7 +282,7 @@ def deleteAnalysis(analysis_id):
         print(f"Error deleting analysis: {str(e)}")
         return jsonify({'success': False, 'message': f'Error deleting analysis: {str(e)}'}), 500
 
-@app.route('/getAnalysis/<int:analysis_id>', methods=['GET'])
+@main.route('/getAnalysis/<int:analysis_id>', methods=['GET'])
 @login_required
 def getAnalysis(analysis_id):
     try:
@@ -305,7 +305,7 @@ def getAnalysis(analysis_id):
         print(f"Error retrieving analysis: {str(e)}")
         return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
 
-@app.route('/shareAnalysis/<int:analysis_id>', methods=['POST'])
+@main.route('/shareAnalysis/<int:analysis_id>', methods=['POST'])
 @login_required
 def shareAnalysis(analysis_id):
     try:
@@ -355,7 +355,7 @@ def shareAnalysis(analysis_id):
         return jsonify({'success': False, 'message': f'Error sharing analysis: {str(e)}'}), 500
     
 # New route to delete user's account
-@app.route('/deleteAccount', methods=['POST'])
+@main.route('/deleteAccount', methods=['POST'])
 @login_required
 def deleteAccount():
     try:
@@ -469,7 +469,7 @@ def login():
             return redirect(next_page)
         else:
             flash('Invalid username/email or password. Please try again.', 'danger')
-            return redirect(url_for('index', showLogin='true'))
+            return redirect(url_for('main.index', showLogin='true'))
             
     # If GET request or login failed, show the login form
     return render_template('introductoryView.html', form=form)
@@ -484,4 +484,4 @@ def logout():
     logout_user()
     
     # Redirect to home page
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
