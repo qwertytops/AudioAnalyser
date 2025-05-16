@@ -508,12 +508,19 @@ def get_analysis(analysis_id):
 @login_required
 def get_users():
     query = request.args.get('q', '').strip()
+    ignore_self = False if request.args.get('self') == 'false' else True
     if not query:
         users = User.query.all()
-        return jsonify([user.username for user in users])
+        if not ignore_self:
+            return jsonify([user.username for user in users])
+        else:
+            return jsonify([user.username for user in users if user.id != current_user.id])
 
     users = User.query.filter(User.username.ilike(f'%{query}%')).all()
-    return jsonify([user.username for user in users])
+    if not ignore_self:
+        return jsonify([user.username for user in users])
+    else:
+        return jsonify([user.username for user in users if user.id != current_user.id])
 
 @main.route('/export-history')
 @login_required
@@ -558,3 +565,79 @@ def export_history():
         as_attachment=True,
         download_name=f'analysis_history_{current_user.username}_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
     )
+
+
+# Revised backend route for fetching shared analysis
+@app.route('/getSharedAnalysis/<int:shared_id>', methods=['GET'])
+@login_required
+def getSharedAnalysis(shared_id):
+    try:
+        # Print debugging info
+        print(f"Fetching shared analysis with ID: {shared_id} for user: {current_user.id}")
+        
+        # Find the shared analysis entry
+        shared = SharedResults.query.filter_by(id=shared_id, toUser=current_user.id).first()
+        
+        if not shared:
+            print(f"Shared analysis {shared_id} not found for user {current_user.id}")
+            return jsonify({
+                'success': False, 
+                'message': 'Shared analysis not found'
+            }), 404
+        
+        print(f"Found shared analysis. Analysis ID: {shared.analysisId}")
+        
+        # Get the actual analysis data
+        analysis = AnalysisResult.query.filter_by(id=shared.analysisId).first()
+        
+        if not analysis:
+            print(f"Analysis {shared.analysisId} not found")
+            return jsonify({
+                'success': False, 
+                'message': 'Original analysis not found'
+            }), 404
+        
+        # Get the sender's username
+        sender = User.query.filter_by(id=shared.fromUser).first()
+        sender_username = sender.username if sender else "Unknown User"
+        
+        # Format the data to be returned
+        analysis_data = {
+            'fileName': analysis.fileName,
+            'clipLength': round(analysis.clipLength, 2),
+            'maxLevel': round(analysis.maxLevel, 2),
+            'highestFrequency': round(analysis.highestFrequency, 2),
+            'lowestFrequency': round(analysis.lowestFrequency, 2),
+            'fundamentalFrequency': round(analysis.fundamentalFrequency, 2),
+            'frequencyArray': analysis.frequencyArray,
+            'fromUser': sender_username,
+            'date': shared.date.strftime('%Y-%m-%d %H:%M'),
+            'message': shared.message or ""
+        }
+        
+        print("Successfully prepared analysis data")
+        return jsonify({'success': True, 'data': analysis_data}), 200
+        
+    except Exception as e:
+        print(f"Error retrieving shared analysis: {str(e)}")
+        # Log the full stack trace
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
+
+@app.route('/removeSharedAnalysis/<int:shared_id>', methods=['POST'])
+@login_required
+def removeSharedAnalysis(shared_id):
+    try:
+        # Find the shared analysis by ID and ensure it belongs to the current user
+        shared = SharedResults.query.filter_by(id=shared_id, toUser=current_user.id).first_or_404()
+        
+        # Delete the shared result entry
+        db.session.delete(shared)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Shared analysis removed successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error removing shared analysis: {str(e)}")
+        return jsonify({'success': False, 'message': f'Error removing shared analysis: {str(e)}'}), 500
