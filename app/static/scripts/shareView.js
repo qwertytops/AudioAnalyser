@@ -19,38 +19,38 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoadingState(true);
         
         fetch(`/api/analysis/${analysisId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch analysis data');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Reset loading state
-                setLoadingState(false);
-                
-                if (data.error) {
-                    showShareResultModal('error', data.error);
-                    return;
-                }
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch analysis data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Reset loading state
+            setLoadingState(false);
+            
+            if (data.error) {
+                showShareResultModal('error', data.error);
+                return;
+            }
 
-                // Populate the fields with the fetched data
-                clipLengthField.textContent = `${data.clipLength.toFixed(2)} seconds`;
-                maxLevelField.textContent = `${data.maxLevel.toFixed(2)} dBFS`;
-                highestFrequencyField.textContent = `${data.highestFrequency.toFixed(2)} Hz`;
-                lowestFrequencyField.textContent = `${data.lowestFrequency.toFixed(2)} Hz`;
-                fundamentalFrequencyField.textContent = `${data.fundamentalFrequency.toFixed(2)} Hz`;
+            // Populate the fields with the fetched data
+            clipLengthField.textContent = `${data.clipLength.toFixed(2)} seconds`;
+            maxLevelField.textContent = `${data.maxLevel.toFixed(2)} dBFS`;
+            highestFrequencyField.textContent = `${data.highestFrequency.toFixed(2)} Hz`;
+            lowestFrequencyField.textContent = `${data.lowestFrequency.toFixed(2)} Hz`;
+            fundamentalFrequencyField.textContent = `${data.fundamentalFrequency.toFixed(2)} Hz`;
 
-                // Draw the frequency array on the canvas
-                visualiseFullWaveform(data.frequencyArray);
-            })
-            .catch(error => {
-                // Reset loading state
-                setLoadingState(false);
-                
-                console.error('Error fetching analysis:', error);
-                showShareResultModal('error', 'An error occurred while fetching the analysis data.');
-            });
+            // Draw the frequency array on the canvas
+            visualiseFullWaveform(data.frequencyArray);
+        })
+        .catch(error => {
+            // Reset loading state
+            setLoadingState(false);
+            
+            console.error('Error fetching analysis:', error);
+            showShareResultModal('error', 'An error occurred while fetching the analysis data.');
+        });
     }
     
     // Helper function to set loading state
@@ -306,11 +306,10 @@ function shareAnalysis() {
         }),
         body: JSON.stringify(requestData)
     })
-    .then(response => {
+    .then(async response => {
         if (!response.ok) {
-            return response.json().then(data => {
-                throw new Error(data.error || `HTTP error! status: ${response.status}`);
-            });
+            const data = await response.json();
+            throw new Error(data.error || `HTTP error! status: ${response.status}`);
         }
         return response.json();
     })

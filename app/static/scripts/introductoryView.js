@@ -10,16 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
         showLogInForm();
     }
     
-    // Update UI based on session state
-    updateNavbarForLoggedInUser();
-    updateMainPageForLoggedInUser(); // Add this new function call
+    // Update UI
+    updateMainPageForLoggedInUser();
 });
-
-// Function to update navigation UI for logged-in user
-function updateNavbarForLoggedInUser() {
-    // This will be handled server-side with Jinja templates
-    // No JavaScript needed for this part when using server-side sessions
-}
 
 function submitLogIn() {
     // Get user input values
@@ -241,8 +234,6 @@ function toggleTheme() {
     
     // Toggle the theme
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    // Apply the theme
     htmlElement.setAttribute('data-bs-theme', newTheme);
     
     // Update the icon

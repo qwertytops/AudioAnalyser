@@ -95,7 +95,7 @@ def save():
 @main.route('/share', methods = ['GET','POST'])
 @login_required
 def share(analysisId=0):
-    if request.method == "POST":
+    if request.method == 'POST':
         data = request.get_json()
         try:
             analysisId = int(data.get('analysisId'))

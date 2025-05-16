@@ -7,8 +7,10 @@ window.addEventListener('DOMContentLoaded', () => {
     const sidePanel = document.getElementById('panel');
     const arrow = document.getElementById('icon');
     const togglePanel = document.getElementById('slide');
+
     let uploadedList = new Set();
     let panel = false;
+
     function displayFiles(files) {
         for (let file of files) {
             uploadedList.add(file.name);
@@ -66,6 +68,7 @@ window.addEventListener('DOMContentLoaded', () => {
         arrow.removeAttribute('transform');
         }
     }
+
     document.getElementById('analyseButton').addEventListener('click', () => {
         chosenFiles = fileInput.files;
         const formData = new FormData();
@@ -88,6 +91,5 @@ window.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
             alert('An error occured while attempting to upload files.');
         });
-    
     });
 });
