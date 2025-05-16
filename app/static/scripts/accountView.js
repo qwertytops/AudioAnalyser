@@ -806,6 +806,7 @@ function setupAnalysisShareButtons() {
     const confirmShareBtn = document.getElementById('confirmShareBtn');
     const shareForm = document.getElementById('shareAnalysisForm');
     const shareStatusMessage = document.getElementById('shareStatusMessage');
+    const usernameSuggestions = document.getElementById('shareUsernameSuggestions');
     
     let currentAnalysisId = null;
     let currentAnalysisName = null;
@@ -823,12 +824,78 @@ function setupAnalysisShareButtons() {
             document.getElementById('shareUsername').classList.remove('is-invalid');
             shareStatusMessage.classList.add('d-none');
             
+            // Clear suggestions
+            usernameSuggestions.innerHTML = '';
+            
             // Set file name in the modal
             document.getElementById('shareFileName').textContent = currentAnalysisName;
             
             // Show the modal
             shareModal.show();
         });
+    });
+    
+    // Username autocomplete functionality
+    const shareUsername = document.getElementById('shareUsername');
+    
+    // Function to fetch and display username suggestions
+    function fetchUsernameSuggestions(query) {
+        queryString = `/api/users?q=${encodeURIComponent(query)}`;
+        if (!query) {
+            queryString = '/api/users';
+        }
+        
+        fetch(queryString)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch username suggestions');
+                }
+                return response.json();
+            })
+            .then(usernames => {
+                // Clear previous suggestions
+                usernameSuggestions.innerHTML = '';
+
+                // Populate the suggestions list
+                usernames.forEach(username => {
+                    const li = document.createElement('li');
+                    li.textContent = username;
+                    li.classList.add('suggestion-item');
+                    li.addEventListener('click', () => {
+                        shareUsername.value = username; // Set the input value to the clicked username
+                        usernameSuggestions.innerHTML = ''; // Clear suggestions
+                    });
+                    usernameSuggestions.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching username suggestions:', error);
+            });
+    }
+
+    // Event listeners for input field
+    if (shareUsername) {
+        shareUsername.addEventListener('click', (event) => {
+            const query = event.target.value.trim();
+            fetchUsernameSuggestions(query);
+        });
+        
+        shareUsername.addEventListener('input', (event) => {
+            const query = event.target.value.trim();
+            fetchUsernameSuggestions(query);
+        });
+        
+        shareUsername.addEventListener('focus', (event) => {
+            const query = event.target.value.trim();
+            fetchUsernameSuggestions(query);
+        });
+    }
+    
+    // Hide suggestions when clicking outside the input field
+    document.addEventListener('click', (event) => {
+        if (!shareUsername.contains(event.target) && !usernameSuggestions.contains(event.target)) {
+            usernameSuggestions.innerHTML = '';
+        }
     });
     
     // Handle the confirm button in the modal
@@ -880,6 +947,7 @@ function setupAnalysisShareButtons() {
                 // Clear form
                 document.getElementById('shareUsername').value = '';
                 document.getElementById('shareMessage').value = '';
+                usernameSuggestions.innerHTML = '';
                 
                 // Close the modal after a delay
                 setTimeout(() => {
@@ -913,7 +981,7 @@ function setupAnalysisShareButtons() {
     });
     
     // Reset invalid state when typing
-    document.getElementById('shareUsername').addEventListener('input', function() {
+    shareUsername.addEventListener('input', function() {
         this.classList.remove('is-invalid');
     });
 }
