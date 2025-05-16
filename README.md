@@ -23,7 +23,19 @@ Users can upload audio files for analysis, and the app will display detailed inf
 - `flask run`
 - That's it
 
-4. ...
+4. ## Testing
+
+Test files:
+- testUpload.py
+- testSignup.py
+- testSignin.py
+- testAccount.py
+- testAnalysis.py
+- testSelenium.py
+
+To run testfile: python3 -m unittest app.tests.testfile
+e.g. python3 -m unittest app.tests.testAccount
+
 
 
 
