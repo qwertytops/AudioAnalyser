@@ -267,10 +267,10 @@
                                     </div>
                                 </div>
                                 <div class="history-item-actions">
-                                    <button class="btn btn-sm btn-outline-primary">
+                                    <button class="btn btn-sm btn-outline-primary" data-shared-id="{{ shared.id }}">
                                         <i class="fas fa-eye me-1"></i>View
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger">
+                                    <button class="btn btn-sm btn-outline-danger" data-shared-id="{{ shared.id }}">
                                         <i class="fas fa-trash me-1"></i>Remove
                                     </button>
                                 </div>
@@ -473,7 +473,174 @@
         </div>
     </div>
 </div>
+
+
+<!-- New modal for deleting shared analysis items -->
+<div class="modal fade" id="deleteSharedAnalysisModal" tabindex="-1" aria-labelledby="deleteSharedAnalysisModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteSharedAnalysisModalLabel">Remove Shared Analysis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to remove this shared analysis? This will only remove it from your list.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmRemoveSharedBtn">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Include the accountView.js file that contains the original functionality -->
 <script src="{{ url_for('static', filename='scripts/accountView.js') }}"></script>
 
+<script>
+// Immediate fix for the shared remove buttons
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded - setting up immediate fix for shared remove buttons");
+    
+    // Wait a short time to ensure all other scripts have run
+    setTimeout(function() {
+        console.log("Running delayed modal setup");
+        
+        // Get references to all buttons and modals
+        const sharedRemoveButtons = document.querySelectorAll('.shared-analysis-list .btn-outline-danger');
+        const sharedModal = document.getElementById('deleteSharedAnalysisModal');
+        const confirmRemoveBtn = document.getElementById('confirmRemoveSharedBtn');
+        
+        console.log(`Found ${sharedRemoveButtons.length} shared remove buttons`);
+        
+        // Completely override the shared remove buttons
+        sharedRemoveButtons.forEach((button, index) => {
+            console.log(`Setting up shared remove button ${index}`);
+            
+            // Remove all existing event listeners
+            const clone = button.cloneNode(true);
+            button.parentNode.replaceChild(clone, button);
+            
+            // Set a direct override for the click handler
+            clone.onclick = function(event) {
+                console.log(`Shared remove button ${index} clicked`);
+                
+                // Stop event bubbling and default behavior
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Get the shared ID
+                const sharedId = clone.getAttribute('data-shared-id');
+                
+                // Store references globally for the confirm button to use
+                window.currentSharedId = sharedId;
+                window.currentRemoveButton = clone;
+                
+                // Open only the shared modal
+                const modal = new bootstrap.Modal(sharedModal);
+                modal.show();
+                
+                // Return false to prevent any other handlers
+                return false;
+            };
+            
+            // Remove Bootstrap data attributes if they exist
+            clone.removeAttribute('data-bs-toggle');
+            clone.removeAttribute('data-bs-target');
+        });
+        
+        // Set up the confirm button for shared removal
+        if (confirmRemoveBtn) {
+            const confirmClone = confirmRemoveBtn.cloneNode(true);
+            confirmRemoveBtn.parentNode.replaceChild(confirmClone, confirmRemoveBtn);
+            
+            confirmClone.onclick = function() {
+                // Get stored references
+                const sharedId = window.currentSharedId;
+                const button = window.currentRemoveButton;
+                
+                if (!sharedId || !button) {
+                    console.error("Missing shared ID or button reference");
+                    return;
+                }
+                
+                // Show loading state
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Removing...';
+                this.disabled = true;
+                
+                // Send the remove request
+                fetch(`/removeSharedAnalysis/${sharedId}`, {
+                    method: 'POST',
+                    headers: addCsrfHeader({
+                        'Content-Type': 'application/json'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Reset button state
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    
+                    // Hide the modal
+                    const modalInstance = bootstrap.Modal.getInstance(sharedModal);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    } else {
+                        // Manual hide
+                        sharedModal.classList.remove('show');
+                        sharedModal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        
+                        // Remove backdrop
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                    }
+                    
+                    if (data.success) {
+                        // Remove the item from the DOM
+                        const sharedItem = button.closest('.history-item');
+                        if (sharedItem) {
+                            sharedItem.remove();
+                            
+                            // Show success message
+                            showAlert('success', data.message || 'Shared analysis removed successfully.');
+                            
+                            // Check if there are any items left
+                            const sharedList = document.querySelector('.shared-analysis-list');
+                            if (sharedList && sharedList.children.length === 0) {
+                                // Show empty state
+                                const emptyState = document.querySelector('.shared-empty');
+                                if (emptyState) {
+                                    emptyState.classList.remove('d-none');
+                                }
+                            }
+                        }
+                    } else {
+                        // Show error message
+                        showAlert('danger', data.message || 'Failed to remove shared analysis.');
+                    }
+                    
+                    // Reset window references
+                    window.currentSharedId = null;
+                    window.currentRemoveButton = null;
+                })
+                .catch(error => {
+                    console.error('Error removing shared analysis:', error);
+                    
+                    // Reset button state
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    
+                    // Show error message
+                    showAlert('danger', 'An error occurred while removing the shared analysis.');
+                    
+                    // Reset window references
+                    window.currentSharedId = null;
+                    window.currentRemoveButton = null;
+                });
+            };
+        }
+    }, 500); // Wait 500ms to ensure all other scripts have run
+});
+</script>
 {% endblock %}
