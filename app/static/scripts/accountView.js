@@ -22,6 +22,30 @@ if (sectionParam === 'history') {
     }
 }
 
+// Helper function to show alerts
+function showAlert(type, message) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insert alert at the top of the main content
+    const mainContent = document.querySelector('.col-md-8');
+    if (mainContent) {
+        mainContent.prepend(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
+        }, 5000);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Menu switching functionality
     const menuItems = document.querySelectorAll('.account-menu-item');
@@ -194,30 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 modal.hide();
             });
         });
-    }
-    
-    // Helper function to show alerts
-    function showAlert(type, message) {
-        // Create alert element
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Insert alert at the top of the main content
-        const mainContent = document.querySelector('.col-md-8');
-        if (mainContent) {
-            mainContent.prepend(alertDiv);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-                setTimeout(() => alertDiv.remove(), 150);
-            }, 5000);
-        }
     }
             
     // Setup delete analysis buttons if we're on the history section
@@ -579,30 +579,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 saveProfileBtn.disabled = false;
             });
         });
-    }
-    
-    // Helper function to show alerts
-    function showAlert(type, message) {
-        // Create alert element
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.role = 'alert';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        
-        // Insert alert at the top of the main content
-        const mainContent = document.querySelector('.col-md-8');
-        if (mainContent) {
-            mainContent.prepend(alertDiv);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                alertDiv.classList.remove('show');
-                setTimeout(() => alertDiv.remove(), 150);
-            }, 5000);
-        } 
     }
 });
 
