@@ -62,7 +62,7 @@ def cleanupFiles():
         print(e)
         return jsonify({"status": "error"}), 500
         
-@app.route('/save', methods=['GET', 'POST'])
+@app.route('/save', methods=['POST'])
 def save():
 
     if not current_user.is_authenticated:
