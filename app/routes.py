@@ -90,7 +90,7 @@ def save():
     return jsonify({'message': 'Analysis saved successfully!'}), 200
 
 
-@main.route('/share')
+@main.route('/share', methods = ['GET','POST'])
 @login_required
 def share(analysisId=0):
     if request.method == "POST":
@@ -485,3 +485,33 @@ def logout():
     
     # Redirect to home page
     return redirect(url_for('main.index'))
+
+@main.route('/api/analysis/<int:analysis_id>', methods=['GET'])
+@login_required
+def get_analysis(analysis_id):
+    analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first()
+    if not analysis:
+        return jsonify({'error': 'Analysis not found'}), 404
+
+    return jsonify({
+        'id': analysis.id,
+        'fileName': analysis.fileName,
+        'clipLength': analysis.clipLength,
+        'maxLevel': analysis.maxLevel,
+        'highestFrequency': analysis.highestFrequency,
+        'lowestFrequency': analysis.lowestFrequency,
+        'fundamentalFrequency': analysis.fundamentalFrequency,
+        'frequencyArray': analysis.frequencyArray,
+        'createdAt': analysis.createdAt.strftime('%Y-%m-%d %H:%M:%S')
+    })
+
+@main.route('/api/users', methods=['GET'])
+@login_required
+def get_users():
+    query = request.args.get('q', '').strip()
+    if not query:
+        users = User.query.all()
+        return jsonify([user.username for user in users])
+
+    users = User.query.filter(User.username.ilike(f'%{query}%')).all()
+    return jsonify([user.username for user in users])
