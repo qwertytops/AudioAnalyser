@@ -66,7 +66,7 @@ def cleanupFiles():
         print(e)
         return jsonify({"status": "error"}), 500
         
-@app.route('/save', methods=['POST'])
+@main.route('/save', methods=['POST'])
 def save():
 
     if not current_user.is_authenticated:
@@ -131,7 +131,7 @@ def share(analysisId=0):
     else:
         myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
         if not myAnalyses:
-            return redirect(url_for('upload'))
+            return redirect(url_for('main.upload'))
         
         # Get the most recent analysis if analysisId is not provided
         most_recent_analysis = AnalysisResult.query.filter_by(userId=current_user.id).order_by(AnalysisResult.createdAt.desc()).first()
@@ -407,7 +407,7 @@ def is_valid_password(password):
             re.search(r'[A-Za-z]', password) and 
             re.search(r'\d', password))
 
-@app.route('/signUp', methods=['GET', 'POST'])
+@main.route('/signUp', methods=['GET', 'POST'])
 def signUp():
     form = SignUpForm()
     if form.validate_on_submit():
@@ -515,7 +515,7 @@ def get_users():
     users = User.query.filter(User.username.ilike(f'%{query}%')).all()
     return jsonify([user.username for user in users])
 
-@app.route('/export-history')
+@main.route('/export-history')
 @login_required
 def export_history():
     # Get all analyses for the current user
