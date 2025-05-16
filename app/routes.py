@@ -127,8 +127,7 @@ def share(analysisId=0):
     else:
         myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
         if not myAnalyses:
-            flash("You have no analyses to share.", "warning")
-            return redirect(url_for('index'))
+            return redirect(url_for('upload'))
         
         # Get the most recent analysis if analysisId is not provided
         most_recent_analysis = AnalysisResult.query.filter_by(userId=current_user.id).order_by(AnalysisResult.createdAt.desc()).first()
