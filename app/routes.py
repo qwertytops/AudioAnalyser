@@ -568,7 +568,7 @@ def export_history():
 
 
 # Revised backend route for fetching shared analysis
-@app.route('/getSharedAnalysis/<int:shared_id>', methods=['GET'])
+@main.route('/getSharedAnalysis/<int:shared_id>', methods=['GET'])
 @login_required
 def getSharedAnalysis(shared_id):
     try:
@@ -625,7 +625,7 @@ def getSharedAnalysis(shared_id):
         traceback.print_exc()
         return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
 
-@app.route('/removeSharedAnalysis/<int:shared_id>', methods=['POST'])
+@main.route('/removeSharedAnalysis/<int:shared_id>', methods=['POST'])
 @login_required
 def removeSharedAnalysis(shared_id):
     try:
