@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to fetch and display username suggestions
     function fetchUsernameSuggestions(query) {
-        queryString = `/api/users?q=${encodeURIComponent(query)}`;
+        queryString = `/api/users?q=${encodeURIComponent(query)}&self=false`;
         if (!query) {
-            queryString = '/api/users';
+            queryString = '/api/users?self=false';
         }
         
         fetch(queryString)
@@ -127,9 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const query = event.target.value.trim();
         fetchUsernameSuggestions(query);
     });
-    
-    // Add event listener for share button
-    shareButton.addEventListener('click', shareAnalysis);
 
     // Hide suggestions when clicking outside the input field
     document.addEventListener('click', (event) => {
