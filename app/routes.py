@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, url_for, session, request, jsonify
+from flask import render_template, flash, redirect, url_for, session, request, jsonify, send_file
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 from app import app, db
@@ -9,6 +9,8 @@ from app.passwordHashing import verify_password
 import datetime
 import re
 import os
+import csv
+from io import StringIO, BytesIO
 
 
 uploadFolder = 'app/static/uploads/'
@@ -394,7 +396,7 @@ def deleteAccount():
 # Function to validate email format
 def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(email_regex, email) is not None
+    return re.match(email_regex) is not None
 
 # Function to validate password requirements
 def is_valid_password(password):
@@ -512,3 +514,47 @@ def get_users():
 
     users = User.query.filter(User.username.ilike(f'%{query}%')).all()
     return jsonify([user.username for user in users])
+
+@app.route('/export-history')
+@login_required
+def export_history():
+    # Get all analyses for the current user
+    analyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
+    
+    # Create a string buffer and write to it
+    si = StringIO()
+    writer = csv.writer(si)
+    
+    # Write headers
+    writer.writerow(['File Name', 'Created At', 'Clip Length (s)', 'Max Level (dBFS)', 
+                    'Highest Frequency (Hz)', 'Lowest Frequency (Hz)', 
+                    'Fundamental Frequency (Hz)'])
+    
+    # Write data rows
+    for analysis in analyses:
+        writer.writerow([
+            analysis.fileName,
+            analysis.createdAt.strftime('%Y-%m-%d %H:%M:%S'),
+            round(analysis.clipLength, 2),
+            round(analysis.maxLevel, 2),
+            round(analysis.highestFrequency, 2),
+            round(analysis.lowestFrequency, 2),
+            round(analysis.fundamentalFrequency, 2)
+        ])
+    
+    # Get the value and convert to bytes
+    output = si.getvalue().encode('utf-8')
+    si.close()
+    
+    # Create a BytesIO object
+    mem = BytesIO()
+    mem.write(output)
+    mem.seek(0)
+    
+    # Create response
+    return send_file(
+        mem,
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=f'analysis_history_{current_user.username}_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    )

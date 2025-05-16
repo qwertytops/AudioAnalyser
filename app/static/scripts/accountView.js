@@ -226,6 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupAnalysisViewButtons();
         setupAnalysisShareButtons();
     } 
+    setupExportButton();
 });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -909,4 +910,58 @@ function setupAnalysisShareButtons() {
     document.getElementById('shareUsername').addEventListener('input', function() {
         this.classList.remove('is-invalid');
     });
+}
+
+function setupExportButton() {
+    const exportBtn = document.getElementById('exportHistoryBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Exporting...';
+            this.disabled = true;
+
+            // Make request to export endpoint
+            fetch('/export-history', {
+                method: 'GET',
+                headers: addCsrfHeader({})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+                // Get filename from Content-Disposition header
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = 'analysis_history.csv';
+                if (disposition && disposition.includes('filename=')) {
+                    filename = disposition.split('filename=')[1].replace(/['"]/g, '');
+                }
+                return response.blob().then(blob => ({ blob, filename }));
+            })
+            .then(({ blob, filename }) => {
+                // Create and trigger download
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;  // Use the filename from the server
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                showAlert('success', 'Analysis history exported successfully!');
+            })
+            .catch(error => {
+                console.error('Export error:', error);
+                showAlert('danger', 'Failed to export analysis history. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                this.innerHTML = originalText;
+                this.disabled = false;
+            });
+        });
+    }
 }
