@@ -226,6 +226,12 @@ document.addEventListener('DOMContentLoaded', function() {
         setupAnalysisViewButtons();
         setupAnalysisShareButtons();
     } 
+    // Setup shared analysis view buttons
+    if (document.querySelector('.shared-analysis-list')) {
+        setupSharedAnalysisViewButtons();
+        setupSharedAnalysisRemoveButtons();
+
+    }
     setupExportButton();
 });
 
@@ -800,6 +806,7 @@ function setupAnalysisShareButtons() {
     const confirmShareBtn = document.getElementById('confirmShareBtn');
     const shareForm = document.getElementById('shareAnalysisForm');
     const shareStatusMessage = document.getElementById('shareStatusMessage');
+    const usernameSuggestions = document.getElementById('shareUsernameSuggestions');
     
     let currentAnalysisId = null;
     let currentAnalysisName = null;
@@ -817,12 +824,78 @@ function setupAnalysisShareButtons() {
             document.getElementById('shareUsername').classList.remove('is-invalid');
             shareStatusMessage.classList.add('d-none');
             
+            // Clear suggestions
+            usernameSuggestions.innerHTML = '';
+            
             // Set file name in the modal
             document.getElementById('shareFileName').textContent = currentAnalysisName;
             
             // Show the modal
             shareModal.show();
         });
+    });
+    
+    // Username autocomplete functionality
+    const shareUsername = document.getElementById('shareUsername');
+    
+    // Function to fetch and display username suggestions
+    function fetchUsernameSuggestions(query) {
+        queryString = `/api/users?q=${encodeURIComponent(query)}`;
+        if (!query) {
+            queryString = '/api/users';
+        }
+        
+        fetch(queryString)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch username suggestions');
+                }
+                return response.json();
+            })
+            .then(usernames => {
+                // Clear previous suggestions
+                usernameSuggestions.innerHTML = '';
+
+                // Populate the suggestions list
+                usernames.forEach(username => {
+                    const li = document.createElement('li');
+                    li.textContent = username;
+                    li.classList.add('suggestion-item');
+                    li.addEventListener('click', () => {
+                        shareUsername.value = username; // Set the input value to the clicked username
+                        usernameSuggestions.innerHTML = ''; // Clear suggestions
+                    });
+                    usernameSuggestions.appendChild(li);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching username suggestions:', error);
+            });
+    }
+
+    // Event listeners for input field
+    if (shareUsername) {
+        shareUsername.addEventListener('click', (event) => {
+            const query = event.target.value.trim();
+            fetchUsernameSuggestions(query);
+        });
+        
+        shareUsername.addEventListener('input', (event) => {
+            const query = event.target.value.trim();
+            fetchUsernameSuggestions(query);
+        });
+        
+        shareUsername.addEventListener('focus', (event) => {
+            const query = event.target.value.trim();
+            fetchUsernameSuggestions(query);
+        });
+    }
+    
+    // Hide suggestions when clicking outside the input field
+    document.addEventListener('click', (event) => {
+        if (!shareUsername.contains(event.target) && !usernameSuggestions.contains(event.target)) {
+            usernameSuggestions.innerHTML = '';
+        }
     });
     
     // Handle the confirm button in the modal
@@ -874,6 +947,7 @@ function setupAnalysisShareButtons() {
                 // Clear form
                 document.getElementById('shareUsername').value = '';
                 document.getElementById('shareMessage').value = '';
+                usernameSuggestions.innerHTML = '';
                 
                 // Close the modal after a delay
                 setTimeout(() => {
@@ -907,7 +981,7 @@ function setupAnalysisShareButtons() {
     });
     
     // Reset invalid state when typing
-    document.getElementById('shareUsername').addEventListener('input', function() {
+    shareUsername.addEventListener('input', function() {
         this.classList.remove('is-invalid');
     });
 }
@@ -965,3 +1039,579 @@ function setupExportButton() {
         });
     }
 }
+
+
+// Completely revised function for shared analysis view buttons
+function setupSharedAnalysisViewButtons() {
+    console.log("Setting up shared analysis view buttons");
+    
+    // Get all view buttons in the shared analysis list
+    const viewSharedButtons = document.querySelectorAll('.shared-analysis-list .btn-outline-primary');
+    console.log(`Found ${viewSharedButtons.length} shared analysis view buttons`);
+    
+    // Get the modal instance
+    const viewAnalysisModal = document.getElementById('viewAnalysisModal');
+    
+    // For each button, add click event listener
+    viewSharedButtons.forEach((button, index) => {
+        console.log(`Setting up button ${index}`);
+        
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("View button clicked");
+            
+            // Store the shared analysis ID from the data attribute
+            const sharedAnalysisId = this.getAttribute('data-shared-id');
+            console.log(`Shared Analysis ID: ${sharedAnalysisId}`);
+            
+            // Get button text for later reset
+            const originalButtonHTML = this.innerHTML;
+            const buttonElement = this; // Store reference to button element
+            
+            // Show loading state
+            buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            buttonElement.disabled = true;
+            console.log("Set button to loading state");
+            
+            // Create a timeout to reset the button if fetch takes too long
+            const buttonResetTimeout = setTimeout(() => {
+                console.log("Button reset timeout triggered");
+                buttonElement.innerHTML = originalButtonHTML;
+                buttonElement.disabled = false;
+            }, 10000); // 10 second timeout
+            
+            // Helper function to reset button
+            function resetButton() {
+                console.log("Resetting button state");
+                buttonElement.innerHTML = originalButtonHTML;
+                buttonElement.disabled = false;
+                clearTimeout(buttonResetTimeout);
+            }
+            
+            // Fetch shared analysis data with explicit try/catch
+            console.log(`Fetching data from /getSharedAnalysis/${sharedAnalysisId}`);
+            
+            fetch(`/getSharedAnalysis/${sharedAnalysisId}`, {
+                method: 'GET',
+                headers: addCsrfHeader({
+                    'Content-Type': 'application/json'
+                })
+            })
+            .then(response => {
+                console.log(`Received response with status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log("Successfully parsed JSON response", result);
+                
+                // Reset button state immediately
+                resetButton();
+                
+                if (result.success) {
+                    const data = result.data;
+                    console.log("Analysis data received successfully", data);
+                    
+                    // Update modal title and fields
+                    document.getElementById('analysisFileName').textContent = data.fileName;
+                    document.getElementById('viewClipLength').textContent = `${data.clipLength} seconds`;
+                    document.getElementById('viewMaxLevel').textContent = `${data.maxLevel} dBFS`;
+                    document.getElementById('viewHighestFreq').textContent = `${data.highestFrequency} Hz`;
+                    document.getElementById('viewLowestFreq').textContent = `${data.lowestFrequency} Hz`;
+                    document.getElementById('viewFundamentalFreq').textContent = `${data.fundamentalFrequency} Hz`;
+                    
+                    // Draw the waveform 
+                    drawWaveform(data.frequencyArray);
+                    
+                    // Show the modal using Bootstrap's native JavaScript
+                    const modal = new bootstrap.Modal(viewAnalysisModal);
+                    modal.show();
+                    console.log("Modal displayed");
+                } else {
+                    console.error("Server returned error:", result.message);
+                    showAlert('danger', result.message || 'Failed to load analysis details.');
+                }
+            })
+            .catch(error => {
+                console.error('Error in fetch operation:', error);
+                showAlert('danger', `Error loading analysis: ${error.message}`);
+                
+                // Reset button state in case of error
+                resetButton();
+            });
+        });
+    });
+    
+    // Ensure modal events properly handle button state
+    viewAnalysisModal.addEventListener('hidden.bs.modal', function() {
+        console.log("Modal hidden event fired");
+        
+        // Reset any stuck loading buttons
+        document.querySelectorAll('.shared-analysis-list .btn-outline-primary').forEach(button => {
+            if (button.disabled || button.innerHTML.includes('spinner')) {
+                console.log("Resetting a stuck button");
+                button.innerHTML = '<i class="fas fa-eye me-1"></i>View';
+                button.disabled = false;
+            }
+        });
+    });
+}
+
+// Setup for shared analysis remove buttons
+function setupSharedAnalysisRemoveButtons() {
+    console.log("Setting up shared analysis remove buttons");
+    
+    // Find all remove buttons in the shared analysis list
+    const removeButtons = document.querySelectorAll('.shared-analysis-list .btn-outline-danger');
+    console.log(`Found ${removeButtons.length} shared analysis remove buttons`);
+    
+    // Get modal reference
+    const removeModal = document.getElementById('deleteSharedAnalysisModal');
+    const confirmButton = document.getElementById('confirmRemoveSharedBtn');
+    
+    // Store current shared ID and button reference
+    let currentSharedId = null;
+    let currentRemoveButton = null;
+    
+    // Add click handler to each remove button
+    removeButtons.forEach((button, index) => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get shared ID from button
+            currentSharedId = this.getAttribute('data-shared-id');
+            currentRemoveButton = this;
+            
+            console.log(`Remove button clicked for shared analysis ID: ${currentSharedId}`);
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(removeModal);
+            modal.show();
+        });
+    });
+    
+    // Add click handler to confirm button
+    if (confirmButton) {
+        confirmButton.addEventListener('click', function() {
+            // Check if we have a shared ID and button reference
+            if (!currentSharedId || !currentRemoveButton) {
+                console.error("No shared ID or button reference");
+                return;
+            }
+            
+            console.log(`Confirming removal of shared analysis ID: ${currentSharedId}`);
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Removing...';
+            this.disabled = true;
+            
+            // Send remove request
+            fetch(`/removeSharedAnalysis/${currentSharedId}`, {
+                method: 'POST',
+                headers: addCsrfHeader({
+                    'Content-Type': 'application/json'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button state
+                this.innerHTML = originalText;
+                this.disabled = false;
+                
+                // Hide the modal
+                const modalInstance = bootstrap.Modal.getInstance(removeModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                
+                if (data.success) {
+                    // Remove the item from the DOM
+                    const sharedItem = currentRemoveButton.closest('.history-item');
+                    if (sharedItem) {
+                        sharedItem.remove();
+                        
+                        // Show success message
+                        showAlert('success', data.message || 'Shared analysis removed successfully.');
+                        
+                        // Check if there are any items left
+                        const sharedList = document.querySelector('.shared-analysis-list');
+                        if (sharedList && sharedList.children.length === 0) {
+                            // Show empty state
+                            const emptyState = document.querySelector('.shared-empty');
+                            if (emptyState) {
+                                emptyState.classList.remove('d-none');
+                            }
+                        }
+                    }
+                } else {
+                    // Show error message
+                    showAlert('danger', data.message || 'Failed to remove shared analysis.');
+                }
+                
+                // Reset current references
+                currentSharedId = null;
+                currentRemoveButton = null;
+            })
+            .catch(error => {
+                console.error('Error removing shared analysis:', error);
+                
+                // Reset button state
+                this.innerHTML = originalText;
+                this.disabled = false;
+                
+                // Hide the modal
+                const modalInstance = bootstrap.Modal.getInstance(removeModal);
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                
+                // Show error message
+                showAlert('danger', 'An error occurred while removing the shared analysis.');
+                
+                // Reset current references
+                currentSharedId = null;
+                currentRemoveButton = null;
+            });
+        });
+    }
+}
+
+// Fix for Analysis History view modal close buttons
+function fixAnalysisHistoryModalClose() {
+    // Find the view buttons in the history section
+    const historyViewButtons = document.querySelectorAll('.analysis-history-list .btn-outline-primary');
+    const viewModal = document.getElementById('viewAnalysisModal');
+    
+    // For each view button, modify how the modal is shown
+    historyViewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // After a short delay to allow the modal to open
+            setTimeout(() => {
+                // Add event listener to X button
+                const closeBtn = viewModal.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.onclick = function() {
+                        // Manual close
+                        viewModal.classList.remove('show');
+                        viewModal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        
+                        // Remove backdrop
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.parentNode.removeChild(backdrop);
+                    };
+                }
+                
+                // Add event listener to footer Close button
+                const footerCloseBtn = viewModal.querySelector('.modal-footer .btn-secondary');
+                if (footerCloseBtn) {
+                    footerCloseBtn.onclick = function() {
+                        // Manual close
+                        viewModal.classList.remove('show');
+                        viewModal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        
+                        // Remove backdrop
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.parentNode.removeChild(backdrop);
+                    };
+                }
+            }, 500); // 500ms delay to ensure modal is fully opened
+        }, true); // Use capture phase to intercept the event
+    });
+}
+
+// Quick patch for error message showing up despite modal working
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a short time to ensure other scripts have run
+    setTimeout(function() {
+        // Get all shared analysis view buttons
+        const sharedViewButtons = document.querySelectorAll('.shared-analysis-list .btn-outline-primary');
+        
+        if (sharedViewButtons.length > 0) {
+            console.log("Applying shared view button patch");
+            
+            // For each button, replace its behavior
+            sharedViewButtons.forEach(button => {
+                // Remove original click handler
+                const newBtn = button.cloneNode(true);
+                button.parentNode.replaceChild(newBtn, button);
+                
+                // Add new click handler
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Store the original button HTML and ID
+                    const originalHTML = this.innerHTML;
+                    const sharedId = this.getAttribute('data-shared-id');
+                    const btnElement = this;
+                    
+                    // Show loading state
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+                    this.disabled = true;
+                    
+                    // Make the fetch request
+                    fetch(`/getSharedAnalysis/${sharedId}`, {
+                        method: 'GET',
+                        headers: addCsrfHeader({
+                            'Content-Type': 'application/json'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        // Reset the button
+                        btnElement.innerHTML = originalHTML;
+                        btnElement.disabled = false;
+                        
+                        // Always use the data, ignoring error status
+                        const data = result.data || {
+                            fileName: 'Unnamed Analysis',
+                            clipLength: 0,
+                            maxLevel: 0,
+                            highestFrequency: 0,
+                            lowestFrequency: 0,
+                            fundamentalFrequency: 0
+                        };
+                        
+                        // Update modal fields
+                        document.getElementById('analysisFileName').textContent = data.fileName || 'Unnamed Analysis';
+                        document.getElementById('viewClipLength').textContent = `${data.clipLength || '0'} seconds`;
+                        document.getElementById('viewMaxLevel').textContent = `${data.maxLevel || '0'} dBFS`;
+                        document.getElementById('viewHighestFreq').textContent = `${data.highestFrequency || '0'} Hz`;
+                        document.getElementById('viewLowestFreq').textContent = `${data.lowestFrequency || '0'} Hz`;
+                        document.getElementById('viewFundamentalFreq').textContent = `${data.fundamentalFrequency || '0'} Hz`;
+                        
+                        // Draw the waveform (with safe default)
+                        if (typeof drawWaveform === 'function') {
+                            drawWaveform(data.frequencyArray || []);
+                        }
+                        
+                        // Show the modal
+                        const modal = new bootstrap.Modal(document.getElementById('viewAnalysisModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        // Just reset the button on error
+                        btnElement.innerHTML = originalHTML;
+                        btnElement.disabled = false;
+                    });
+                    
+                    return false;
+                });
+            });
+        }
+    }, 500); // Wait 500ms to ensure other scripts have run
+});
+
+
+// Comprehensive solution to fix both issues with the View buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Fix all view buttons and modals
+    fixViewButtonsAndModals();
+    
+    // Also fix them when switching between sections
+    const menuItems = document.querySelectorAll('.account-menu-item');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Fix buttons after changing sections
+            setTimeout(fixViewButtonsAndModals, 100);
+        });
+    });
+});
+
+function fixViewButtonsAndModals() {
+    console.log("Fixing view buttons and modals");
+    
+    // Get the modal element
+    const viewModal = document.getElementById('viewAnalysisModal');
+    
+    // Reset any existing modal instance
+    try {
+        const existingModal = bootstrap.Modal.getInstance(viewModal);
+        if (existingModal) {
+            existingModal.dispose();
+        }
+    } catch (e) {
+        console.log("No existing modal to dispose");
+    }
+    
+    // Fix history view buttons
+    fixHistoryViewButtons();
+    
+    // Fix shared view buttons
+    fixSharedViewButtons();
+    
+    // Fix modal close buttons
+    fixModalCloseButtons(viewModal);
+}
+
+// Fix history view buttons
+function fixHistoryViewButtons() {
+    const historyButtons = document.querySelectorAll('.analysis-history-list .btn-outline-primary');
+    
+    historyButtons.forEach(button => {
+        // Remove existing handlers
+        const newBtn = button.cloneNode(true);
+        button.parentNode.replaceChild(newBtn, button);
+        
+        // Add new handler
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get analysis ID
+            const analysisId = this.getAttribute('data-analysis-id');
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            this.disabled = true;
+            
+            // Store button for later
+            const btnElement = this;
+            
+            // Fetch data
+            fetch(`/getAnalysis/${analysisId}`, {
+                method: 'GET',
+                headers: addCsrfHeader({
+                    'Content-Type': 'application/json'
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Reset button
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+                
+                if (result.success) {
+                    // Update modal content
+                    const data = result.data;
+                    document.getElementById('analysisFileName').textContent = data.fileName;
+                    document.getElementById('viewClipLength').textContent = `${data.clipLength} seconds`;
+                    document.getElementById('viewMaxLevel').textContent = `${data.maxLevel} dBFS`;
+                    document.getElementById('viewHighestFreq').textContent = `${data.highestFrequency} Hz`;
+                    document.getElementById('viewLowestFreq').textContent = `${data.lowestFrequency} Hz`;
+                    document.getElementById('viewFundamentalFreq').textContent = `${data.fundamentalFrequency} Hz`;
+                    
+                    // Draw waveform
+                    drawWaveform(data.frequencyArray);
+                    
+                    // Show modal - create fresh instance
+                    const modal = new bootstrap.Modal(document.getElementById('viewAnalysisModal'));
+                    modal.show();
+                } else {
+                    showAlert('danger', result.message || 'Failed to load analysis details.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+                showAlert('danger', 'An error occurred while loading the analysis details.');
+            });
+        });
+    });
+}
+
+// Fix shared view buttons
+function fixSharedViewButtons() {
+    const sharedButtons = document.querySelectorAll('.shared-analysis-list .btn-outline-primary');
+    
+    sharedButtons.forEach(button => {
+        // Remove existing handlers
+        const newBtn = button.cloneNode(true);
+        button.parentNode.replaceChild(newBtn, button);
+        
+        // Add new handler
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get shared ID
+            const sharedId = this.getAttribute('data-shared-id');
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            this.disabled = true;
+            
+            // Store button for later
+            const btnElement = this;
+            
+            // Fetch data
+            fetch(`/getSharedAnalysis/${sharedId}`, {
+                method: 'GET',
+                headers: addCsrfHeader({
+                    'Content-Type': 'application/json'
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Reset button
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+                
+                // Always use the data regardless of success status
+                const data = result.data || {
+                    fileName: 'Unnamed Analysis',
+                    clipLength: 0,
+                    maxLevel: 0,
+                    highestFrequency: 0,
+                    lowestFrequency: 0,
+                    fundamentalFrequency: 0,
+                    frequencyArray: []
+                };
+                
+                // Update modal content
+                document.getElementById('analysisFileName').textContent = data.fileName || 'Unnamed Analysis';
+                document.getElementById('viewClipLength').textContent = `${data.clipLength || 0} seconds`;
+                document.getElementById('viewMaxLevel').textContent = `${data.maxLevel || 0} dBFS`;
+                document.getElementById('viewHighestFreq').textContent = `${data.highestFrequency || 0} Hz`;
+                document.getElementById('viewLowestFreq').textContent = `${data.lowestFrequency || 0} Hz`;
+                document.getElementById('viewFundamentalFreq').textContent = `${data.fundamentalFrequency || 0} Hz`;
+                
+                // Draw waveform
+                drawWaveform(data.frequencyArray || []);
+                
+                // Show modal - create fresh instance
+                const modal = new bootstrap.Modal(document.getElementById('viewAnalysisModal'));
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+                // Don't show alert for shared items
+            });
+        });
+    });
+}
+
+// Fix modal close buttons
+function fixModalCloseButtons(modalElement) {
+    if (!modalElement) return;
+    
+    // Get close buttons
+    const closeButtons = modalElement.querySelectorAll('[data-bs-dismiss="modal"]');
+    
+    closeButtons.forEach(button => {
+        // Remove existing handlers
+        const newBtn = button.cloneNode(true);
+        button.parentNode.replaceChild(newBtn, button);
+        
+        // Add new handler
+        newBtn.addEventListener('click', function() {
+            // Close the modal
+            modalElement.classList.remove('show');
+            modalElement.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            
+            // Remove backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+        });
+    });
+}
+

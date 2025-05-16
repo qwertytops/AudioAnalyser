@@ -286,3 +286,39 @@
     gap: 0.5rem;
     margin-top: 1rem;
 }
+
+/* Suggestions list styling for the share modal */
+.suggestions-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 0.25rem;
+    z-index: 1000;
+    padding: 0;
+}
+
+.suggestion-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #e9ecef;
+    list-style-type: none;
+}
+
+.suggestion-item:hover {
+    background-color: #f8f9fa;
+    color: #4361ee;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] .suggestion-item {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .suggestion-item:hover {
+    background-color: #343a40;
+    color: #4895ef;
+}
