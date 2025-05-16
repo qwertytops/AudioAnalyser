@@ -8,3 +8,4 @@ flask-migrate
 flask_login
 werkzeug
 email-validator
+selenium
