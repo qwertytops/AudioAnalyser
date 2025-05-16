@@ -15,14 +15,13 @@
         This page is still in development!
     </div>
 
-    <div class="text-center"  style="display: none;">
-        <button id="uploadButton" href = "/upload" class="btn btn-primary btn-lg" >
+    <div class="text-center" style="display: none;">
+        <button id="uploadButton" href="/upload" class="btn btn-primary btn-lg">
             Upload
         </button>
     </div>
 
-    
-    <div id = "selector" class="form-group text-center">
+    <div id="selector" class="form-group text-center">
         <h2 class="text-center">Uploaded Files</h2>
         <label for="fileSelect" class="form-label">Select a file:</label>
         <select id="fileSelect" class="form-control w-50 mx-auto">
@@ -133,7 +132,7 @@
                 <p><span id="fundamental-frequency">N/A</span> Hz (<span id="fundamental-pitch">N/A</span>)</p>
             </div>
             <!-- 
-            <a href="{{ url_for('main.save') }}" class="text-decoration-none text-dark">
+            <a href="{{ url_for('save') }}" class="text-decoration-none text-dark">
                 <div class="feature-card-share text-center">
                     <div class="feature-icon mx-auto">
                         <i class="fas fa-share"></i>
@@ -171,6 +170,18 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="custom-spinner">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="loading-text">Saving Results...</p>
 </div>
 
 <script src="{{ url_for('static', filename='scripts/analysisView.js') }}"></script>

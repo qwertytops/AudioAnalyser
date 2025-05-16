@@ -1,98 +1,120 @@
 {% extends "base.html" %}
 {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/introductoryView.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shareView.css') }}">
 {% endblock %}
 {% block content %}
-<div class="main-content">
 
-    <div class="sidebar-Container">
-        <div class = "sidebar">
-            <div class="sidebar-Title">
-                Options
-            </div>
-            <ul class="sidebar-List">
-                <li class = "sidebar-Option active" onclick="switchContent('share', this)"> <svg id = "shareIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share-fill" viewBox="0 0 16 16">
-                    <path  d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.5 2.5 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5"/>
-                  </svg> Share</li>
-                <li class = "sidebar-Option" onclick="switchContent('notification', this)"><svg id = "bell" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
-                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5 5 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
-                  </svg>Notifications</li>
-                
-            </ul>
-        </div> 
+<div class="container app-container">
+    <div class="app-header">
+        <h1 class="display-4 app-title">Share Your Analysis</h1>
+        <p class="app-subtitle">Share your audio analysis results with other Audiometry users</p>
+    </div>
 
-        <div class="content">
-            <div class = "section active" id = "share">
-                <h1>Share</h1>
-                <div class = "form-container">
-                    <p>Add a message</p>
-                    <textarea placeholder="send a message (optional)"></textarea>
-                    <p>Select Analysis</p>
-                    <select class="analysis-select"> 
-                        <option value="1">analysis 1</option>
-                        <option value="2">analysis 2</option>
-                        <option value="3">analysis 3</option>
-                    </select>
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Share Analysis</h5>
                 </div>
-                <p class = "sum">Analysis Summary</p>
-                <div class="mt-5 text-center">
-                    <canvas id="oscilloscope" width="500" height="200"></canvas>
-                </div>
-                <div class="analysis">
-                    
-                    <div class="data">
-                      <div class="data-label">Clip Length</div>
-                      <div class="data-value">-</div>
+                <div class="card-body">
+                    <form id="shareForm">
+                        <div class="mb-4">
+                            <label for="analysisSelect" class="form-label fw-bold">Select Analysis</label>
+                            <select id="analysisSelect" class="form-select">
+                                {% for analysis in myAnalyses %}
+                                <option value="{{ analysis[0] }}">{{ analysis[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="message" class="form-label fw-bold">Add a Message (Optional)</label>
+                            <textarea id="message" class="form-control" rows="3" 
+                                placeholder="Add a message to go along with your analysis"></textarea>
+                        </div>
+
+                        <div class="mb-4 position-relative">
+                            <label for="recipientInput" class="form-label fw-bold">Share with User</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" id="recipientInput" class="form-control" 
+                                    placeholder="Enter a username">
+                            </div>
+                            <ul id="usernameSuggestions" class="suggestions-list list-group position-absolute w-100 z-1"></ul>
+                        </div>
+                    </form>
+
+                    <h5 class="mt-5 mb-3">Analysis Summary</h5>
+                    <div class="mt-4 text-center">
+                        <canvas id="oscilloscope" width="600" height="200" 
+                            class="border border-primary rounded mb-4"></canvas>
                     </div>
-                    <div class="data">
-                      <div class="data-label">Max level (dBFS)</div>
-                      <div class="data-value">-</div>
+
+                    <div class="data-grid">
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h5>Clip Length</h5>
+                            <p id="clipLengthField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <h5>Max Level</h5>
+                            <p id="maxLevelField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <h5>Highest Frequency</h5>
+                            <p id="highestFrequencyField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <h5>Lowest Frequency</h5>
+                            <p id="lowestFrequencyField" class="fw-bold">-</p>
+                        </div>
+                        <div class="feature-card-static text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <h5>Fundamental Frequency</h5>
+                            <p id="fundamentalFrequencyField" class="fw-bold">-</p>
+                        </div>
                     </div>
-                    <div class="data">
-                      <div class="data-label">Highest Frequency</div>
-                      <div class="data-value">-</div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" class="btn btn-primary" id="shareButton" onclick="shareAnalysis()">
+                            <i class="fas fa-share me-2"></i>Share Analysis
+                        </button>
                     </div>
-                    <div class="data">
-                      <div class="data-label">Lowest Frequency</div>
-                      <div class="data-value">-</div>
-                    </div>
-                    <div class="data">
-                        <div class="data-label">Fundamental Frequency</div>
-                        <div class="data-value">-</div>
-                      </div>
                 </div>
-                <div class = "friend">
-                    <label for="friendSelect" class="friend-label">Share with:</label>
-                    <select id="friendSelect" class="friend-select"> 
-                        <option disabled selected>Select a friend</option>
-                        <option value="1">friend 1</option>
-                        <option value="2">friend 2</option>
-                        <option value="3">friend 3</option>
-                    </select>
-                </div>
-                
-
-                <div class="shareButton">
-                    <button type="button" class="btn btn-primary" id = "shareButton">Share</button>
-                </div>
-
-            </div>
-
-
-            <div class = "section" id = "notification" >
-                <h1>notifications</h1>
-                <div class = "notBell">
-                    <i id = "bell2" class="fas fa-bell-slash" style="font-size: 48px; color: #dadce0; margin-bottom: 20px;"></i>
-                    <p>No new notifications</p>
-                    
-                </div>
-                
             </div>
         </div>
-        
-           
+    </div>
+</div>
 
-
+<!-- Share Result Modal -->
+<div class="modal fade" id="shareResultModal" tabindex="-1" aria-labelledby="shareResultModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareResultModalLabel">Share Analysis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="shareResultMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 
