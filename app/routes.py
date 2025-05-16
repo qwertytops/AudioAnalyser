@@ -396,7 +396,7 @@ def deleteAccount():
 # Function to validate email format
 def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(email_regex) is not None
+    return re.match(email_regex, email) is not None
 
 # Function to validate password requirements
 def is_valid_password(password):
@@ -404,8 +404,6 @@ def is_valid_password(password):
     return (len(password) >= 8 and 
             re.search(r'[A-Za-z]', password) and 
             re.search(r'\d', password))
-
-
 
 @app.route('/signUp', methods=['GET', 'POST'])
 def signUp():
