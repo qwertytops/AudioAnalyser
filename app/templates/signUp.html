@@ -33,7 +33,7 @@
       {% endif %}
     {% endwith %}
     
-    <form action="{{ url_for('signUp') }}" method="POST" id="signUpForm" class="auth-form" novalidate>
+    <form action="{{ url_for('main.signUp') }}" method="POST" id="signUpForm" class="auth-form" novalidate>
         {{ form.hidden_tag() }}
         <h3 class="text-center mb-4">Join Audiometry</h3>
         

@@ -1,7 +1,7 @@
-from flask import render_template, flash, redirect, url_for, session, request, jsonify, send_file
+from flask import render_template, flash, redirect, url_for, session, request, jsonify, send_file, Blueprint, current_app
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
-from app import app, db
+from app import db
 from app.models import User, AnalysisResult, SharedResults
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.forms import LoginForm, SignUpForm
@@ -12,16 +12,17 @@ import os
 import csv
 from io import StringIO, BytesIO
 
+main = Blueprint('main', __name__)
 
-uploadFolder = 'app/static/uploads/'
-app.config['UPLOAD_FOLDER'] = uploadFolder
-@app.route('/')
-@app.route('/index')
+
+
+@main.route('/')
+@main.route('/index')
 def index():
     form = LoginForm()
     return render_template('introductoryView.html', form=form)
 
-@app.route('/upload' , methods=['GET', 'POST'])
+@main.route('/upload' , methods=['GET', 'POST'])
 def upload():
     if request.method == 'POST':
         if 'files' not in request.files:
@@ -33,14 +34,14 @@ def upload():
             if file.filename == '':
                 continue
             if file:
-                filePath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                filePath = os.path.join(current_app.config['UPLOAD_FOLDER'], file.filename)
                 file.save(filePath)
                 savedFiles.append(file.filename)
-        return redirect(url_for('analysis', files=",".join(savedFiles)))
+        return redirect(url_for('main.analysis', files=",".join(savedFiles)))
                 
     return render_template('uploadView.html')
 
-@app.route('/analysis', methods=['GET'])
+@main.route('/analysis', methods=['GET'])
 def analysis():
     sentFiles = request.args.get('files')
     if sentFiles:
@@ -52,11 +53,12 @@ def analysis():
     return render_template('analysisView.html')
 
 
-@app.route('/cleanupFiles', methods=['POST'])
+@main.route('/cleanupFiles', methods=['POST'])
 def cleanupFiles():
     try:
-        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
-            filePath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        upload_dir = current_app.config['UPLOAD_FOLDER']
+        for filename in os.listdir(upload_dir):
+            filePath = os.path.join(upload_dir, filename)
             if os.path.isfile(filePath):
                 os.unlink(filePath)
         return jsonify({"status": "success"}), 200
@@ -64,7 +66,7 @@ def cleanupFiles():
         print(e)
         return jsonify({"status": "error"}), 500
         
-@app.route('/save', methods=['POST'])
+@main.route('/save', methods=['POST'])
 def save():
 
     if not current_user.is_authenticated:
@@ -90,7 +92,7 @@ def save():
     return jsonify({'message': 'Analysis saved successfully!'}), 200
 
 
-@app.route('/share', methods=['GET', 'POST'])
+@main.route('/share', methods = ['GET','POST'])
 @login_required
 def share(analysisId=0):
     if request.method == "POST":
@@ -129,7 +131,7 @@ def share(analysisId=0):
     else:
         myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
         if not myAnalyses:
-            return redirect(url_for('upload'))
+            return redirect(url_for('main.upload'))
         
         # Get the most recent analysis if analysisId is not provided
         most_recent_analysis = AnalysisResult.query.filter_by(userId=current_user.id).order_by(AnalysisResult.createdAt.desc()).first()
@@ -139,7 +141,7 @@ def share(analysisId=0):
                                myAnalyses=[(x.id, x.fileName) for x in myAnalyses],
                                analysisId=analysisId)
 
-@app.route('/account')
+@main.route('/account')
 @login_required
 def account():
     myAnalyses = AnalysisResult.query.filter_by(userId=current_user.id).all()
@@ -183,7 +185,7 @@ def account():
                          sharedAnalyses=formattedShared)
 
 # New route to delete user's analysis history
-@app.route('/deleteHistory', methods=['POST'])
+@main.route('/deleteHistory', methods=['POST'])
 @login_required
 def deleteHistory():
     try:
@@ -202,7 +204,7 @@ def deleteHistory():
         return jsonify({'success': False, 'message': f'Error deleting history: {str(e)}'}), 500
 
 
-@app.route('/updateProfile', methods=['POST'])
+@main.route('/updateProfile', methods=['POST'])
 @login_required
 def updateProfile():
     try:
@@ -261,7 +263,7 @@ def updateProfile():
         print(f"Error updating profile: {str(e)}")
         return jsonify({'success': False, 'message': f'Error updating profile: {str(e)}'}), 500
 
-@app.route('/deleteAnalysis/<int:analysis_id>', methods=['POST'])
+@main.route('/deleteAnalysis/<int:analysis_id>', methods=['POST'])
 @login_required
 def deleteAnalysis(analysis_id):
     try:
@@ -281,7 +283,7 @@ def deleteAnalysis(analysis_id):
         print(f"Error deleting analysis: {str(e)}")
         return jsonify({'success': False, 'message': f'Error deleting analysis: {str(e)}'}), 500
 
-@app.route('/getAnalysis/<int:analysis_id>', methods=['GET'])
+@main.route('/getAnalysis/<int:analysis_id>', methods=['GET'])
 @login_required
 def getAnalysis(analysis_id):
     try:
@@ -304,7 +306,7 @@ def getAnalysis(analysis_id):
         print(f"Error retrieving analysis: {str(e)}")
         return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
 
-@app.route('/shareAnalysis/<int:analysis_id>', methods=['POST'])
+@main.route('/shareAnalysis/<int:analysis_id>', methods=['POST'])
 @login_required
 def shareAnalysis(analysis_id):
     try:
@@ -354,7 +356,7 @@ def shareAnalysis(analysis_id):
         return jsonify({'success': False, 'message': f'Error sharing analysis: {str(e)}'}), 500
     
 # New route to delete user's account
-@app.route('/deleteAccount', methods=['POST'])
+@main.route('/deleteAccount', methods=['POST'])
 @login_required
 def deleteAccount():
     try:
@@ -405,7 +407,7 @@ def is_valid_password(password):
             re.search(r'[A-Za-z]', password) and 
             re.search(r'\d', password))
 
-@app.route('/signUp', methods=['GET', 'POST'])
+@main.route('/signUp', methods=['GET', 'POST'])
 def signUp():
     form = SignUpForm()
     if form.validate_on_submit():
@@ -431,7 +433,7 @@ def signUp():
     
     return render_template('signUp.html', form=form)
 
-@app.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -461,17 +463,17 @@ def login():
             # Redirect to the requested page or default to index
             next_page = request.args.get('next')
             if not next_page or not next_page.startswith('/'):
-                next_page = url_for('index')
+                next_page = url_for('main.index')
                 
             return redirect(next_page)
         else:
             flash('Invalid username/email or password. Please try again.', 'danger')
-            return redirect(url_for('index', showLogin='true'))
+            return redirect(url_for('main.index', showLogin='true'))
             
     # If GET request or login failed, show the login form
     return render_template('introductoryView.html', form=form)
 
-@app.route('/logout')
+@main.route('/logout')
 def logout():
     # Clear user session
     session.pop('user_id', None)
@@ -481,9 +483,9 @@ def logout():
     logout_user()
     
     # Redirect to home page
-    return redirect(url_for('index'))
+    return redirect(url_for('main.index'))
 
-@app.route('/api/analysis/<int:analysis_id>', methods=['GET'])
+@main.route('/api/analysis/<int:analysis_id>', methods=['GET'])
 @login_required
 def get_analysis(analysis_id):
     analysis = AnalysisResult.query.filter_by(id=analysis_id, userId=current_user.id).first()
@@ -502,7 +504,7 @@ def get_analysis(analysis_id):
         'createdAt': analysis.createdAt.strftime('%Y-%m-%d %H:%M:%S')
     })
 
-@app.route('/api/users', methods=['GET'])
+@main.route('/api/users', methods=['GET'])
 @login_required
 def get_users():
     query = request.args.get('q', '').strip()
@@ -520,7 +522,7 @@ def get_users():
     else:
         return jsonify([user.username for user in users if user.id != current_user.id])
 
-@app.route('/export-history')
+@main.route('/export-history')
 @login_required
 def export_history():
     # Get all analyses for the current user
@@ -566,7 +568,7 @@ def export_history():
 
 
 # Revised backend route for fetching shared analysis
-@app.route('/getSharedAnalysis/<int:shared_id>', methods=['GET'])
+@main.route('/getSharedAnalysis/<int:shared_id>', methods=['GET'])
 @login_required
 def getSharedAnalysis(shared_id):
     try:
@@ -623,7 +625,7 @@ def getSharedAnalysis(shared_id):
         traceback.print_exc()
         return jsonify({'success': False, 'message': f'Error retrieving analysis: {str(e)}'}), 500
 
-@app.route('/removeSharedAnalysis/<int:shared_id>', methods=['POST'])
+@main.route('/removeSharedAnalysis/<int:shared_id>', methods=['POST'])
 @login_required
 def removeSharedAnalysis(shared_id):
     try:
